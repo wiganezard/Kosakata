@@ -1,0 +1,1620 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kuis Minna no Nihongo — Semua Bab (1–25)</title>
+<style>
+  :root{
+    --bg:#0c1424;
+    --panel:#121c2f;
+    --text:#e8eefc;
+    --muted:#93a4c8;
+    --accent:#3b82f6;
+    --accent-2:#60a5fa;
+    --ok:#22c55e;
+    --bad:#ef4444;
+    --warn:#f59e0b;
+    --border:#223153;
+  }
+  *{box-sizing:border-box}
+  body{font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);margin:0;padding:24px}
+  .container{max-width:760px;margin:auto;background:linear-gradient(180deg,#0f172a 0%, var(--panel) 100%);
+    border:1px solid var(--border);border-radius:16px;padding:24px;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+  h2{margin:0 0 10px;font-weight:800;letter-spacing:.3px}
+  small{color:var(--muted)}
+  button{padding:12px 18px;margin:10px 0;border:none;border-radius:10px;background:var(--accent);
+    color:#fff;font-weight:700;cursor:pointer;transition:.2s;box-shadow:0 2px 0 rgba(0,0,0,.2)}
+  button:hover{filter:brightness(1.07)}
+  button:disabled{opacity:.5;cursor:not-allowed}
+  .option{display:block;margin:12px 0;padding:14px;border:1px solid var(--border);border-radius:10px;
+    text-align:left;cursor:pointer;background:#0b1527;transition:.15s}
+  .option:hover{background:#0f1c35}
+  .option.correct{background:#0e1f17;border-color:var(--ok)}
+  .option.wrong{background:#2a1111;border-color:var(--bad)}
+  .progress{height:10px;background:#0a1222;border-radius:999px;overflow:hidden;margin:18px 0;border:1px solid var(--border)}
+  .bar{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent-2));transition:.3s}
+  .meta{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-weight:600}
+  .timer{font-weight:800;color:#fca5a5}
+  .explain{margin-top:12px;padding:12px;border-left:4px solid var(--accent);background:#0a1222;border:1px solid var(--border);border-radius:10px}
+  .review{margin-top:26px;text-align:left;background:#0a1222;border:1px solid var(--border);border-radius:12px;padding:18px}
+  .review h3{color:var(--accent);margin:0 0 12px}
+  .review-item{margin:10px 0 16px;border-bottom:1px dashed var(--border);padding-bottom:12px}
+  .review-item.correct{border-left:4px solid var(--ok);padding-left:10px}
+  .review-item.wrong{border-left:4px solid var(--bad);padding-left:10px}
+  .review-item.timeout{border-left:4px solid var(--warn);padding-left:10px}
+  #restart{display:none}
+  #menu{text-align:center;padding:40px}
+  select{padding:10px;border-radius:8px;border:1px solid var(--border);background:#0b1527;color:var(--text);font-weight:600}
+</style>
+</head>
+<body>
+<div class="container">
+  <!-- ===== Menu Awal Pilih Bab ===== -->
+  <div id="menu">
+    <h2>Pilih Bab Minna no Nihongo</h2>
+    <select id="selectBab">
+      <option value="1">Bab 1</option>
+      <option value="2">Bab 2</option>
+      <option value="3">Bab 3</option>
+      <option value="4">Bab 4</option>
+      <option value="5">Bab 5</option>
+      <option value="6">Bab 6</option>
+      <option value="7">Bab 7</option>
+      <option value="8">Bab 8</option>
+      <option value="9">Bab 9</option>
+      <option value="10">Bab 10</option>
+      <option value="11">Bab 11</option>
+      <option value="12">Bab 12</option>
+      <option value="13">Bab 13</option>
+      <option value="14">Bab 14</option>
+      <option value="15">Bab 15</option>
+      <option value="16">Bab 16</option>
+      <option value="17">Bab 17</option>
+      <option value="18">Bab 18</option>
+      <option value="19">Bab 19</option>
+      <option value="20">Bab 20</option>
+      <option value="21">Bab 21</option>
+      <option value="22">Bab 22</option>
+      <option value="23">Bab 23</option>
+      <option value="24">Bab 24</option>
+      <option value="25">Bab 25</option>
+    </select><br>
+    <button onclick="startFromMenu()">Mulai</button>
+  </div>
+  
+  <!-- ===== Area Kuis ===== -->
+  <div id="quiz" style="display:none">
+    <h2 id="judulBab">Kuis Kosakata Bab</h2>
+
+    <div class="progress"><div id="bar" class="bar"></div></div>
+
+    <div class="meta">
+      <div id="progressText">Soal 1/20</div>
+      <div class="timer"><span id="time">20</span></div>
+    </div>
+
+    <h3 id="question" style="margin:14px 0 6px">Pertanyaan</h3>
+    <div id="options"></div>
+    <p id="result" style="font-weight:800"></p>
+    <div id="explain" class="explain" style="display:none"></div>
+
+    <button id="next" disabled>Berikutnya</button>
+    <p id="scoreBox" style="color:var(--muted);font-weight:700">Skor: 0</p>
+
+    <div id="reviewSection" class="review" style="display:none"></div>
+    <button id="restart">🔁 Ulangi Kuis</button>
+    <button id="backToMenu" style="display:none">🏠 Pilih Bab Lagi</button>
+    
+  </div>
+</div>
+
+<script>
+/* ===== efek suara singkat ===== */
+function playSound(f, d, type = "sine", vol = 0.5) {
+  try {
+    const c = new (window.AudioContext || window.webkitAudioContext)(),
+          o = c.createOscillator(),
+          g = c.createGain();
+
+    o.connect(g);
+    g.connect(c.destination);
+    o.type = type;                 // jenis gelombang (sine, square, sawtooth, triangle)
+    o.frequency.value = f;
+    g.gain.setValueAtTime(vol, c.currentTime); // volume
+    o.start();
+    o.stop(c.currentTime + d / 1000);
+    o.onended = () => c.close();
+  } catch (e) {}
+}
+
+/* ✅ suara BENAR: lembut, cepat, nada tinggi */
+const ding = () => playSound(950, 180, "triangle", 0.4);
+
+/* ❌ suara SALAH: lebih keras, nada rendah, efek square tegas */
+const buzz = () => {
+  playSound(200, 120, "sine", 0.55);
+  setTimeout(() => playSound(160, 120, "sine", 0.45), 130);
+  setTimeout(() => playSound(120, 120, "sine", 0.45), 260);
+};
+
+/* ===== BANK SOAL PER BAB (contoh beberapa, nanti isi sendiri) ===== */
+const allWordsBab1 = [
+  // Pronomina
+  {jp:"わたし", id:"saya", cat:"pronomina", e:"Kata ganti orang pertama tunggal, dipakai secara umum dan sopan."},
+  {jp:"あなた", id:"Anda", cat:"pronomina", e:"Kata ganti orang kedua, digunakan kepada lawan bicara dengan sopan."},
+  {jp:"あのひと", id:"orang itu", cat:"pronomina", e:"Kanji: あの人 = あの (itu) + 人 (hito, orang). Bentuk sopan: あのかた."},
+  {jp:"あのかた", id:"beliau (bentuk sopan)", cat:"pronomina", e:"Bentuk sopan dari あのひと, dipakai untuk menunjukkan rasa hormat."},
+
+  // Akhiran nama & sapaan
+  {jp:"～さん", id:"Sapaan umum", cat:"sapaan", e:"Diletakkan di belakang nama orang sebagai bentuk sopan."},
+  {jp:"～ちゃん", id:"akhiran untuk anak kecil / perempuan", cat:"sapaan", e:"Digunakan untuk anak kecil, teman dekat, atau wanita dengan nada akrab."},
+  {jp:"～くん", id:"akhiran untuk anak laki-laki", cat:"sapaan", e:"Dipakai untuk memanggil anak laki-laki atau bawahan di kantor."},
+  {jp:"～じん", id:"Menyatakan kebangsaan", cat:"akhiran", e:"Kanji: ～人 = 人 (jin, orang). Contoh: アメリカじん = orang Amerika."},
+
+  // Pekerjaan & profesi
+  {jp:"せんせい", id:"guru, dosen", cat:"pekerjaan", e:"Kanji: 先生 = 先 (sen, dahulu) + 生 (sei, hidup). Tidak dipakai untuk pekerjaan sendiri."},
+  {jp:"きょうし", id:"guru (profesi sendiri)", cat:"pekerjaan", e:"Kanji: 教師 = 教 (kyou, mengajar) + 師 (shi, guru)."},
+  {jp:"がくせい", id:"mahasiswa", cat:"pekerjaan", e:"Kanji: 学生 = 学 (gaku, belajar) + 生 (sei, murid)."},
+  {jp:"かいしゃいん", id:"karyawan perusahaan", cat:"pekerjaan", e:"Kanji: 会社員 = 会社 (kaisha, perusahaan) + 員 (in, anggota)."},
+  {jp:"しゃいん", id:"pegawai perusahaan", cat:"pekerjaan", e:"Digunakan dengan nama perusahaan. Contoh: IMC の しゃいん = pegawai IMC."},
+  {jp:"ぎんこういん", id:"pegawai bank", cat:"pekerjaan", e:"Kanji: 銀行員 = 銀 (gin, perak) + 行 (kou, lembaga) + 員 (in, anggota)."},
+  {jp:"いしゃ", id:"dokter", cat:"pekerjaan", e:"Kanji: 医者 = 医 (i, medis) + 者 (sha, orang)."},
+  {jp:"けんきゅうしゃ", id:"peneliti", cat:"pekerjaan", e:"Kanji: 研究者 = 研究 (kenkyuu, penelitian) + 者 (sha, orang)."},
+
+  // Tempat
+  {jp:"だいがく", id:"universitas", cat:"tempat", e:"Kanji: 大学 = 大 (dai, besar) + 学 (gaku, belajar)."},
+  {jp:"びょういん", id:"rumah sakit", cat:"tempat", e:"Kanji: 病院 = 病 (byou, sakit) + 院 (in, institusi)."},
+
+  // Tanya
+  {jp:"だれ", id:"siapa", cat:"kata tanya", e:"Kata tanya umum untuk orang. Bentuk sopan: どなた."},
+  {jp:"どなた", id:"siapa (bentuk sopan)", cat:"kata tanya", e:"Digunakan lebih sopan daripada だれ."},
+
+  // Umur
+  {jp:"～さい", id:"umur ... tahun", cat:"angka/umur", e:"Kanji: ～歳 = tahun umur. Contoh: 20さい = 20 tahun."},
+  {jp:"なんさい", id:"umur berapa", cat:"kata tanya", e:"Kanji: 何歳 = 何 (nan, apa) + 歳 (sai, tahun umur). Bentuk sopan: おいくつ."},
+  {jp:"おいくつ", id:"umur berapa (sopan)", cat:"kata tanya", e:"Bentuk sopan dari なんさい."},
+
+  // Salam & ekspresi
+  {jp:"はい", id:"ya", cat:"ungkapan", e:"Jawaban afirmatif sederhana."},
+  {jp:"いいえ", id:"tidak / bukan", cat:"ungkapan", e:"Jawaban negatif sederhana."},
+  {jp:"はじめまして", id:"Perkenalkan.", cat:"ungkapan", e:"Ucapan salam pertama kali berkenalan."},
+  {jp:"どうぞよろしくおねがいします", id:"Salam kenal / mohon bimbingannya", cat:"ungkapan", e:"Ucapan sopan di akhir perkenalan. Kanji: 宜しくお願いします."},
+  {jp:"～からきました", id:"datang dari ～", cat:"ungkapan", e:"Digunakan untuk memperkenalkan asal. Contoh: インドネシアからきました。"},
+  {jp:"しつれいですが", id:"permisi, maaf ", cat:"ungkapan", e:"Ucapan sopan untuk mendahului pertanyaan pribadi."},
+  {jp:"おなまえは？", id:"Siapa namanya?", cat:"ungkapan", e:"Kanji: お名前は = nama Anda adalah... (bentuk sopan)."},
+  {jp:"こちらは～さんです", id:"Ini adalah Sdr ～", cat:"ungkapan", e:"Ungkapan memperkenalkan orang lain."},
+
+  // Negara
+  {jp:"アメリカ", id:"Amerika Serikat", cat:"negara", e:"Nama negara — ditulis dalam katakana."},
+  {jp:"イギリス", id:"Inggris", cat:"negara", e:"Nama negara — katakana."},
+  {jp:"インド", id:"India", cat:"negara", e:"Nama negara — katakana."},
+  {jp:"インドネシア", id:"Indonesia", cat:"negara", e:"Nama negara — katakana."},
+  {jp:"かんこく", id:"Korea Selatan", cat:"negara", e:"Kanji: 韓国 = 韓 (kan, Korea) + 国 (koku, negara)."},
+  {jp:"タイ", id:"Thailand", cat:"negara", e:"Nama negara — katakana."},
+  {jp:"ちゅうごく", id:"Cina", cat:"negara", e:"Kanji: 中国 = 中 (chuu, tengah) + 国 (koku, negara)."},
+  {jp:"ドイツ", id:"Jerman", cat:"negara", e:"Nama negara — katakana."},
+  {jp:"にほん", id:"Jepang", cat:"negara", e:"Kanji: 日本 = 日 (ni, matahari) + 本 (hon, asal). = negeri matahari terbit."},
+  {jp:"ブラジル", id:"Brasil", cat:"negara", e:"Nama negara — katakana."},
+];
+
+const allWordsBab2 = [
+  // Kata tunjuk (demonstrativa)
+  {jp:"これ", id:"ini", cat:"kata tunjuk", e:"Benda yang dekat dengan pembicara."},
+  {jp:"それ", id:"itu", cat:"kata tunjuk", e:"Benda yang dekat dengan lawan bicara."},
+  {jp:"あれ", id:"itu (jauh)", cat:"kata tunjuk", e:"Benda yang jauh dari pembicara dan lawan bicara."},
+  {jp:"この～", id:"～ ini", cat:"kata tunjuk", e:"Menjelaskan benda/orang dekat pembicara."},
+  {jp:"その～", id:"～ itu (dekat lawan bicara)", cat:"kata tunjuk", e:"Menjelaskan benda/orang dekat lawan bicara."},
+  {jp:"あの～", id:"～ itu (jauh)", cat:"kata tunjuk", e:"Menjelaskan benda/orang jauh dari pembicara & lawan bicara."},
+
+  // Benda umum
+  {jp:"ほん", id:"buku", cat:"benda", e:"Kanji: 本 = buku, asal kata ‘hon’ juga berarti ‘asal/mula’."},
+  {jp:"じしょ", id:"kamus", cat:"benda", e:"Kanji: 辞書 = 辞 (ji, kata) + 書 (sho, tulisan)."},
+  {jp:"ざっし", id:"majalah", cat:"benda", e:"Kanji: 雑誌 = 雑 (zatsu, campur) + 誌 (shi, tulisan)."},
+  {jp:"しんぶん", id:"koran, surat kabar", cat:"benda", e:"Kanji: 新聞 = 新 (shin, baru) + 聞 (bun, dengar)."},
+  {jp:"ノート", id:"buku catatan", cat:"benda", e:"Dari bahasa Inggris 'note'."},
+  {jp:"てちょう", id:"buku catatan, agenda", cat:"benda", e:"Kanji: 手帳 = 手 (te, tangan) + 帳 (chou, buku kecil)."},
+  {jp:"めいし", id:"kartu nama", cat:"benda", e:"Kanji: 名刺 = 名 (mei, nama) + 刺 (shi, tusuk) — arti harfiah 'kartu nama'."},
+  {jp:"カード", id:"kartu", cat:"benda", e:"Dari bahasa Inggris 'card'."},
+  {jp:"えんぴつ", id:"pensil", cat:"benda", e:"Kanji: 鉛筆 = 鉛 (en, timah) + 筆 (pitsu, alat tulis)."},
+  {jp:"シャープペンシル", id:"pensil mekanik", cat:"benda", e:"Dari 'sharp pencil' (pensil isi ulang)."},
+  {jp:"かぎ", id:"kunci", cat:"benda", e:"Kanji: 鍵 = kunci, simbol keamanan."},
+  {jp:"とけい", id:"jam, arloji", cat:"benda", e:"Kanji: 時計 = 時 (toki, waktu) + 計 (kei, mengukur)."},
+  {jp:"かさ", id:"payung", cat:"benda", e:"Kanji: 傘 = payung."},
+  {jp:"かばん", id:"tas", cat:"benda", e:"Kata serapan dari Portugis 'cabaña' (tas kecil)."},
+  {jp:"CD", id:"CD", cat:"benda", e:"Kependekan dari Compact Disc."},
+  {jp:"テレビ", id:"televisi", cat:"benda", e:"Dari bahasa Inggris 'television'."},
+  {jp:"ラジオ", id:"radio", cat:"benda", e:"Dari bahasa Inggris 'radio'."},
+  {jp:"カメラ", id:"kamera", cat:"benda", e:"Dari bahasa Inggris 'camera'."},
+  {jp:"コンピューター", id:"komputer, PC", cat:"benda", e:"Dari bahasa Inggris 'computer'."},
+  {jp:"くるま", id:"mobil", cat:"benda", e:"Kanji: 車 = kendaraan, mobil."},
+  {jp:"つくえ", id:"meja, meja tulis", cat:"benda", e:"Kanji: 机 = meja kerja."},
+  {jp:"いす", id:"kursi", cat:"benda", e:"Kanji: 椅子 = kursi (arti harfiah: alat duduk)."},
+  {jp:"チョコレート", id:"cokelat", cat:"benda", e:"Dari bahasa Inggris 'chocolate'."},
+  {jp:"コーヒー", id:"kopi", cat:"benda", e:"Dari bahasa Inggris 'coffee'."},
+  {jp:"おみやげ", id:"oleh-oleh", cat:"benda", e:"Kanji: お土産 = 土 (do, tanah) + 産 (san, produk) — hadiah dari perjalanan."},
+
+  // Bahasa
+  {jp:"えいご", id:"bahasa Inggris", cat:"bahasa", e:"Kanji: 英語 = 英 (ei, Inggris) + 語 (go, bahasa)."},
+  {jp:"にほんご", id:"bahasa Jepang", cat:"bahasa", e:"Kanji: 日本語 = 日本 (nihon, Jepang) + 語 (go, bahasa)."},
+  {jp:"～ご", id:"bahasa ～", cat:"bahasa", e:"Akhiran untuk menyebut bahasa negara. Contoh: スペインご = bahasa Spanyol."},
+
+  // Kata tanya
+  {jp:"なん", id:"apa", cat:"kata tanya", e:"Kanji: 何 = apa. Digunakan di awal kalimat tanya umum."},
+  {jp:"そう", id:"begitu", cat:"ungkapan", e:"Ekspresi penegasan: 'Oh begitu' atau 'ya, benar'."},
+
+  // Ekspresi & percakapan
+  {jp:"あのう", id:"Eee... (ungkapan ragu-ragu)", cat:"ungkapan", e:"Dipakai saat ingin menarik perhatian dengan sopan."},
+  {jp:"えっ", id:"Eh... (ungkapan kaget)", cat:"ungkapan", e:"Dipakai ketika terkejut atau tidak menduga sesuatu."},
+  {jp:"どうぞ", id:"Silakan.", cat:"ungkapan", e:"Digunakan saat menawarkan sesuatu atau memberi izin."},
+  {jp:"［どうも］ありがとう ございます", id:"Terima kasih (banyak).", cat:"ungkapan", e:"Ungkapan terima kasih yang sopan."},
+  {jp:"そうですか", id:"Oh, begitu ya.", cat:"ungkapan", e:"Respon sopan setelah mendapat informasi baru."},
+  {jp:"ちがいます", id:"Bukan / Salah.", cat:"ungkapan", e:"Kanji: 違います = berbeda, salah."},
+  {jp:"あ", id:"Ah / Oh.", cat:"ungkapan", e:"Ekspresi saat menyadari sesuatu."},
+
+  // Salam & percakapan (kaiwa)
+  {jp:"これから おせわに なります", id:"Mulai sekarang saya akan menerima bantuan Anda.", cat:"ungkapan", e:"Ucapan sopan saat menjadi bagian baru dari kelompok."},
+  {jp:"こちらこそ［どうぞ］よろしく［おねがいします］", id:"Ya, sama-sama. (jawaban terhadap 'yoroshiku')", cat:"ungkapan", e:"Balasan sopan dari salam 'yoroshiku onegaishimasu'."}
+];
+
+const allWordsBab3 = [
+  // Kata tunjuk tempat
+  {jp:"ここ", id:"sini", cat:"kata tunjuk", e:"Tempat dekat pembicara."},
+  {jp:"そこ", id:"situ", cat:"kata tunjuk", e:"Tempat dekat lawan bicara."},
+  {jp:"あそこ", id:"sana", cat:"kata tunjuk", e:"Tempat jauh dari pembicara dan lawan bicara."},
+  {jp:"どこ", id:"(di) mana", cat:"kata tanya", e:"Menanyakan tempat."},
+  {jp:"こちら", id:"sini (sopan)", cat:"kata tunjuk", e:"Bentuk sopan dari ここ."},
+  {jp:"そちら", id:"situ (sopan)", cat:"kata tunjuk", e:"Bentuk sopan dari そこ."},
+  {jp:"あちら", id:"sana (sopan)", cat:"kata tunjuk", e:"Bentuk sopan dari あそこ."},
+  {jp:"どちら", id:"mana (sopan)", cat:"kata tanya", e:"Bentuk sopan dari どこ."},
+
+  // Tempat & fasilitas
+  {jp:"きょうしつ", id:"ruang kelas", cat:"tempat", e:"Kanji: 教室 = 教 (kyou, mengajar) + 室 (shitsu, ruangan)."},
+  {jp:"しょくどう", id:"ruang makan, kantin", cat:"tempat", e:"Kanji: 食堂 = 食 (shoku, makan) + 堂 (dou, aula)."},
+  {jp:"じむしょ", id:"kantor", cat:"tempat", e:"Kanji: 事務所 = 事 (ji, urusan) + 務 (mu, tugas) + 所 (sho, tempat)."},
+  {jp:"かいぎしつ", id:"ruang rapat", cat:"tempat", e:"Kanji: 会議室 = 会 (kai, pertemuan) + 議 (gi, rapat) + 室 (shitsu, ruangan)."},
+  {jp:"うけつけ", id:"meja informasi, resepsionis", cat:"tempat", e:"Kanji: 受付 = 受 (uke, menerima) + 付 (tsuke, menempel)."},
+  {jp:"ロビー", id:"lobi, ruang tunggu", cat:"tempat", e:"Dari bahasa Inggris 'lobby'."},
+  {jp:"へや", id:"kamar", cat:"tempat", e:"Kanji: 部屋 = 部 (bu, bagian) + 屋 (ya, ruangan)."},
+  {jp:"トイレ", id:"toilet, kamar kecil", cat:"tempat", e:"Dari bahasa Inggris 'toilet'."},
+  {jp:"おてあらい", id:"toilet (sopan)", cat:"tempat", e:"Kanji: お手洗い = 手 (tangan) + 洗い (mencuci)."},
+  {jp:"かいだん", id:"tangga", cat:"tempat", e:"Kanji: 階段 = 階 (kai, tingkat) + 段 (dan, langkah)."},
+  {jp:"エレベーター", id:"lift", cat:"tempat", e:"Dari bahasa Inggris 'elevator'."},
+  {jp:"エスカレーター", id:"eskalator", cat:"tempat", e:"Dari bahasa Inggris 'escalator'."},
+  {jp:"じどうはんばいき", id:"mesin penjual otomatis", cat:"benda", e:"Kanji: 自動販売機 = 自動 (jidou, otomatis) + 販売 (hanbai, jual) + 機 (ki, mesin)."},
+  {jp:"でんわ", id:"telepon", cat:"benda", e:"Kanji: 電話 = 電 (den, listrik) + 話 (wa, bicara)."},
+  {jp:"かいしゃ", id:"perusahaan", cat:"tempat", e:"Kanji: 会社 = 会 (kai, pertemuan) + 社 (sha, organisasi)."},
+  {jp:"うち", id:"rumah", cat:"tempat", e:"Berarti rumah sendiri atau tempat tinggal."},
+
+  // Benda umum
+  {jp:"くつ", id:"sepatu", cat:"benda", e:"Kanji: 靴 = alas kaki, sepatu."},
+  {jp:"ネクタイ", id:"dasi", cat:"benda", e:"Dari bahasa Inggris 'necktie'."},
+  {jp:"ワイン", id:"anggur", cat:"benda", e:"Dari bahasa Inggris 'wine'."},
+  {jp:"うりば", id:"tempat penjualan", cat:"tempat", e:"Kanji: 売り場 = 売 (uri, jual) + 場 (ba, tempat)."},
+  {jp:"ちか", id:"bawah tanah, basement", cat:"tempat", e:"Kanji: 地下 = 地 (chi, tanah) + 下 (ka, bawah)."},
+  {jp:"～かい", id:"lantai ～", cat:"angka/tempat", e:"Kanji: ～階 = lantai (tingkat bangunan)."},
+  {jp:"なんがい", id:"lantai berapa", cat:"kata tanya", e:"Kanji: 何階 = 何 (nan, apa) + 階 (kai, lantai)."},
+  {jp:"えん", id:"yen", cat:"mata uang", e:"Kanji: 円 = mata uang Jepang."},
+  {jp:"いくら", id:"berapa (harga)", cat:"kata tanya", e:"Menanyakan jumlah harga (uang)."},
+  {jp:"ひゃく", id:"seratus", cat:"angka", e:"Kanji: 百 = seratus."},
+  {jp:"せん", id:"seribu", cat:"angka", e:"Kanji: 千 = seribu."},
+  {jp:"まん", id:"sepuluh ribu", cat:"angka", e:"Kanji: 万 = sepuluh ribu."},
+
+  // Ungkapan latihan C
+  {jp:"すみません", id:"maaf / permisi", cat:"ungkapan", e:"Ungkapan sopan untuk meminta perhatian atau maaf."},
+  {jp:"どうも", id:"terima kasih", cat:"ungkapan", e:"Ungkapan singkat untuk berterima kasih."},
+
+  // Percakapan (kaiwa)
+  {jp:"いらっしゃいませ", id:"Selamat datang / Ada yang bisa saya bantu?", cat:"ungkapan", e:"Ucapan sopan kepada pelanggan (biasanya di toko)."},
+  {jp:"［～を］みせてください", id:"Tolong perlihatkan ～.", cat:"ungkapan", e:"Permintaan sopan untuk melihat barang."},
+  {jp:"じゃ", id:"baiklah / kalau begitu", cat:"ungkapan", e:"Transisi dalam percakapan, menunjukkan keputusan."},
+  {jp:"［～を］ください", id:"Tolong berikan ～.", cat:"ungkapan", e:"Ungkapan untuk meminta sesuatu secara sopan."},
+
+  // Negara / kota
+  {jp:"イタリア", id:"Italia", cat:"negara", e:"Nama negara – katakana."},
+  {jp:"スイス", id:"Swiss", cat:"negara", e:"Nama negara – katakana."},
+  {jp:"フランス", id:"Perancis", cat:"negara", e:"Nama negara – katakana."},
+  {jp:"ジャカルタ", id:"Jakarta", cat:"kota", e:"Nama kota Indonesia – katakana."},
+  {jp:"バンコク", id:"Bangkok", cat:"kota", e:"Nama kota Thailand – katakana."},
+  {jp:"ベルリン", id:"Berlin", cat:"kota", e:"Nama kota Jerman – katakana."},
+  {jp:"しんおおさか", id:"Shin-Osaka (nama stasiun)", cat:"tempat", e:"Kanji: 新大阪 = 新 (shin, baru) + 大阪 (Osaka). Stasiun di kota Osaka."}
+];
+
+const allWordsBab4 = [
+  // Kata kerja kegiatan sehari-hari
+  {jp:"おきます", id:"bangun", cat:"kata kerja", e:"Kanji: 起きます = 起 (oki, bangun)."},
+  {jp:"ねます", id:"tidur", cat:"kata kerja", e:"Kanji: 寝ます = 寝 (ne, tidur)."},
+  {jp:"はたらきます", id:"bekerja", cat:"kata kerja", e:"Kanji: 働きます = 働 (hataraki, bekerja)."},
+  {jp:"やすみます", id:"beristirahat, libur", cat:"kata kerja", e:"Kanji: 休みます = 休 (yasu, istirahat)."},
+  {jp:"べんきょうします", id:"belajar", cat:"kata kerja", e:"Kanji: 勉強します = 勉 (ben, berusaha) + 強 (kyou, kuat)."},
+  {jp:"おわります", id:"selesai", cat:"kata kerja", e:"Kanji: 終わります = 終 (owa, akhir)."},
+
+  // Tempat umum
+  {jp:"デパート", id:"toserba", cat:"tempat", e:"Dari bahasa Inggris 'department store'."},
+  {jp:"ぎんこう", id:"bank", cat:"tempat", e:"Kanji: 銀行 = 銀 (gin, perak) + 行 (kou, lembaga)."},
+  {jp:"ゆうびんきょく", id:"kantor pos", cat:"tempat", e:"Kanji: 郵便局 = 郵 (yuu, pos) + 便 (bin, kirim) + 局 (kyoku, kantor)."},
+  {jp:"としょかん", id:"perpustakaan", cat:"tempat", e:"Kanji: 図書館 = 図 (zu, gambar) + 書 (sho, buku) + 館 (kan, gedung)."},
+  {jp:"びじゅつかん", id:"gedung kesenian, museum seni", cat:"tempat", e:"Kanji: 美術館 = 美 (bi, indah) + 術 (jutsu, seni) + 館 (kan, gedung)."},
+
+  // Waktu dan jam
+  {jp:"いま", id:"sekarang", cat:"waktu", e:"Kanji: 今 = saat ini."},
+  {jp:"～じ", id:"jam ～", cat:"waktu", e:"Kanji: ～時 = jam (penanda waktu)."},
+  {jp:"～ふん／～ぷん", id:"～ menit", cat:"waktu", e:"Kanji: ～分 = menit."},
+  {jp:"はん", id:"setengah", cat:"waktu", e:"Digunakan untuk menunjukkan setengah jam, misal 7時半 = pukul setengah delapan."},
+  {jp:"なんじ", id:"jam berapa", cat:"kata tanya", e:"Kanji: 何時 = 何 (nan, apa) + 時 (ji, jam)."},
+  {jp:"なんぷん", id:"berapa menit", cat:"kata tanya", e:"Kanji: 何分 = 何 (nan, apa) + 分 (pun, menit)."},
+  {jp:"ごぜん", id:"a.m. (sebelum tengah hari)", cat:"waktu", e:"Kanji: 午前 = 午 (go, siang) + 前 (zen, sebelum)."},
+  {jp:"ごご", id:"p.m. (setelah tengah hari)", cat:"waktu", e:"Kanji: 午後 = 午 (go, siang) + 後 (go, sesudah)."},
+
+  // Bagian hari
+  {jp:"あさ", id:"pagi", cat:"waktu", e:"Kanji: 朝 = pagi."},
+  {jp:"ひる", id:"siang", cat:"waktu", e:"Kanji: 昼 = siang."},
+  {jp:"ばん（よる）", id:"malam", cat:"waktu", e:"Kanji: 晩／夜 = malam."},
+
+  // Hari dan waktu relatif
+  {jp:"おととい", id:"dua hari yang lalu", cat:"waktu", e:"Menunjukkan waktu dua hari sebelum hari ini."},
+  {jp:"きのう", id:"kemarin", cat:"waktu", e:"Kemarin (satu hari sebelum hari ini)."},
+  {jp:"きょう", id:"hari ini", cat:"waktu", e:"Hari sekarang."},
+  {jp:"あした", id:"besok", cat:"waktu", e:"Hari setelah hari ini."},
+  {jp:"あさって", id:"lusa", cat:"waktu", e:"Dua hari setelah hari ini."},
+  {jp:"けさ", id:"pagi ini", cat:"waktu", e:"Kanji: 今朝 = pagi hari ini."},
+  {jp:"こんばん", id:"malam ini", cat:"waktu", e:"Kanji: 今晩 = malam hari ini."},
+
+  // Istirahat & libur
+  {jp:"やすみ", id:"istirahat, cuti, libur", cat:"kata benda", e:"Kanji: 休み = waktu istirahat."},
+  {jp:"ひるやすみ", id:"istirahat siang", cat:"kata benda", e:"Kanji: 昼休み = 昼 (siang) + 休み (istirahat)."},
+
+  // Aktivitas & acara
+  {jp:"しけん", id:"ujian", cat:"aktivitas", e:"Kanji: 試験 = 試 (shi, mencoba) + 験 (ken, tes)."},
+  {jp:"かいぎ", id:"rapat", cat:"aktivitas", e:"Kanji: 会議 = 会 (kai, pertemuan) + 議 (gi, pembahasan)."},
+  {jp:"えいが", id:"film", cat:"aktivitas", e:"Kanji: 映画 = 映 (ei, pantul) + 画 (ga, gambar)."},
+
+  // Keterangan waktu rutin
+  {jp:"まいあさ", id:"setiap pagi", cat:"keterangan waktu", e:"Kanji: 毎朝 = 毎 (mai, setiap) + 朝 (asa, pagi)."},
+  {jp:"まいばん", id:"setiap malam", cat:"keterangan waktu", e:"Kanji: 毎晩 = 毎 (mai, setiap) + 晩 (ban, malam)."},
+  {jp:"まいにち", id:"setiap hari", cat:"keterangan waktu", e:"Kanji: 毎日 = 毎 (mai, setiap) + 日 (nichi, hari)."},
+
+  // Hari dalam seminggu
+  {jp:"げつようび", id:"hari Senin", cat:"waktu", e:"Kanji: 月曜日 = 月 (getsu, bulan) + 曜日 (hari)."},
+  {jp:"かようび", id:"hari Selasa", cat:"waktu", e:"Kanji: 火曜日 = 火 (ka, api) + 曜日."},
+  {jp:"すいようび", id:"hari Rabu", cat:"waktu", e:"Kanji: 水曜日 = 水 (sui, air) + 曜日."},
+  {jp:"もくようび", id:"hari Kamis", cat:"waktu", e:"Kanji: 木曜日 = 木 (moku, kayu) + 曜日."},
+  {jp:"きんようび", id:"hari Jumat", cat:"waktu", e:"Kanji: 金曜日 = 金 (kin, emas) + 曜日."},
+  {jp:"どようび", id:"hari Sabtu", cat:"waktu", e:"Kanji: 土曜日 = 土 (do, tanah) + 曜日."},
+  {jp:"にちようび", id:"hari Minggu", cat:"waktu", e:"Kanji: 日曜日 = 日 (nichi, matahari) + 曜日."},
+  {jp:"なんようび", id:"hari apa", cat:"kata tanya", e:"Kanji: 何曜日 = 何 (nan, apa) + 曜日 (hari)."},
+
+  // Partikel
+  {jp:"～から", id:"dari ～", cat:"partikel", e:"Digunakan untuk menunjukkan titik awal waktu atau tempat."},
+  {jp:"～まで", id:"sampai ～", cat:"partikel", e:"Menunjukkan batas waktu atau tempat."},
+  {jp:"～と～", id:"dan ～", cat:"partikel", e:"Menyambung kata benda."},
+
+  // Ungkapan latihan
+  {jp:"たいへんですね", id:"O, berat ya.", cat:"ungkapan", e:"Ungkapan empati terhadap kesulitan lawan bicara."},
+
+  // Percakapan (kaiwa)
+  {jp:"ばんごう", id:"nomor", cat:"kata benda", e:"Kanji: 番号 = 番 (ban, nomor) + 号 (gou, simbol)."},
+  {jp:"なんばん", id:"nomor berapa", cat:"kata tanya", e:"Kanji: 何番 = 何 (nan, apa) + 番 (ban, nomor)."},
+  {jp:"そちら", id:"di situ", cat:"kata tunjuk", e:"Bentuk sopan dari そこ."},
+];
+
+const allWordsBab5 = [
+  // ===== KATA KERJA =====
+  {jp:"いきます", id:"pergi", cat:"kata kerja", e:"Kanji: 行きます = 行 (i, pergi). = pergi."},
+  {jp:"きます", id:"datang", cat:"kata kerja", e:"Kanji: 来ます = 来 (ki, datang). = datang."},
+  {jp:"かえります", id:"pulang", cat:"kata kerja", e:"Kanji: 帰ります = 帰 (kae, pulang). = pulang."},
+
+  // ===== TEMPAT =====
+  {jp:"がっこう", id:"sekolah", cat:"tempat", e:"Kanji: 学校 = 学 (gaku, belajar) + 校 (kou, sekolah). = sekolah."},
+  {jp:"スーパー", id:"pasar swalayan", cat:"tempat", e:"supermarket; tempat belanja kebutuhan sehari-hari."},
+  {jp:"えき", id:"stasiun", cat:"tempat", e:"Kanji: 駅 = 駅 (eki, stasiun). = stasiun."},
+
+  // ===== TRANSPORTASI =====
+  {jp:"ひこうき", id:"pesawat terbang", cat:"transportasi", e:"Kanji: 飛行機 = 飛 (hi, terbang) + 行 (kou, pergi) + 機 (ki, mesin)."},
+  {jp:"ふね", id:"kapal laut", cat:"transportasi", e:"Kanji: 船 = 船 (fune, kapal)."},
+  {jp:"でんしゃ", id:"kereta rel listrik", cat:"transportasi", e:"Kanji: 電車 = 電 (den, listrik) + 車 (sha, kendaraan)."},
+  {jp:"ちかてつ", id:"kereta bawah tanah", cat:"transportasi", e:"Kanji: 地下鉄 = 地 (chi, tanah) + 下 (ka, bawah) + 鉄 (tetsu, besi)."},
+  {jp:"しんかんせん", id:"Shinkansen", cat:"transportasi", e:"Kanji: 新幹線 = 新 (shin, baru) + 幹 (kan, utama) + 線 (sen, jalur)."},
+  {jp:"バス", id:"bus", cat:"transportasi", e:"Bus (kendaraan umum)."},
+  {jp:"タクシー", id:"taksi", cat:"transportasi", e:"Taksi."},
+  {jp:"じてんしゃ", id:"sepeda", cat:"transportasi", e:"Kanji: 自転車 = 自 (ji, diri) + 転 (ten, berputar) + 車 (sha, kendaraan)."},
+  {jp:"あるいて", id:"dengan berjalan kaki", cat:"transportasi", e:"Kanji: 歩いて = 歩 (arui, berjalan). = dengan berjalan kaki."},
+
+  // ===== ORANG =====
+  {jp:"ひと", id:"orang", cat:"orang", e:"Kanji: 人 = 人 (hito, orang)."},
+  {jp:"ともだち", id:"teman", cat:"orang", e:"Kanji: 友達 = 友 (tomo, teman) + 達 (tachi, jamak)."},
+  {jp:"かれ", id:"dia (laki-laki)", cat:"orang", e:"Kanji: 彼 = 彼 (kare, dia laki-laki)."},
+  {jp:"かのじょ", id:"dia (perempuan)", cat:"orang", e:"Kanji: 彼女 = 彼 (kano, dia laki-laki) + 女 (jo, perempuan)."},
+  {jp:"かぞく", id:"keluarga", cat:"orang", e:"Kanji: 家族 = 家 (ka, rumah) + 族 (zoku, keluarga)."},
+  {jp:"ひとりで", id:"sendirian", cat:"orang", e:"Kanji: 一人で = 一 (hito, satu) + 人 (ri, orang). = sendirian."},
+
+  // ===== WAKTU =====
+  {jp:"せんしゅう", id:"minggu lalu", cat:"waktu", e:"Kanji: 先週 = 先 (sen, lalu) + 週 (shuu, minggu)."},
+  {jp:"こんしゅう", id:"minggu ini", cat:"waktu", e:"Kanji: 今週 = 今 (kon, sekarang) + 週 (shuu, minggu)."},
+  {jp:"らいしゅう", id:"minggu depan", cat:"waktu", e:"Kanji: 来週 = 来 (rai, datang) + 週 (shuu, minggu)."},
+  {jp:"せんげつ", id:"bulan lalu", cat:"waktu", e:"Kanji: 先月 = 先 (sen, lalu) + 月 (getsu, bulan)."},
+  {jp:"こんげつ", id:"bulan ini", cat:"waktu", e:"Kanji: 今月 = 今 (kon, sekarang) + 月 (getsu, bulan)."},
+  {jp:"らいげつ", id:"bulan depan", cat:"waktu", e:"Kanji: 来月 = 来 (rai, datang) + 月 (getsu, bulan)."},
+  {jp:"きょねん", id:"tahun lalu", cat:"waktu", e:"Kanji: 去年 = 去 (kyo, lalu) + 年 (nen, tahun)."},
+  {jp:"ことし", id:"tahun ini", cat:"waktu", e:"Kanji: 今年 = 今 (kon, sekarang) + 年 (toshi, tahun)."},
+  {jp:"らいねん", id:"tahun depan", cat:"waktu", e:"Kanji: 来年 = 来 (rai, datang) + 年 (nen, tahun)."},
+
+  // ===== PENANDA WAKTU =====
+  {jp:"～ねん", id:"tahun —", cat:"waktu", e:"Kanji: ～年 = 年 (nen, tahun)."},
+  {jp:"なんねん", id:"tahun berapa", cat:"waktu", e:"Kanji: 何年 = 何 (nan, apa) + 年 (nen, tahun)."},
+  {jp:"～がつ", id:"bulan —", cat:"waktu", e:"Kanji: ～月 = 月 (gatsu, bulan)."},
+  {jp:"なんがつ", id:"bulan apa", cat:"waktu", e:"Kanji: 何月 = 何 (nan, apa) + 月 (gatsu, bulan)."},
+
+  // ===== TANGGAL =====
+  {jp:"ついたち", id:"tanggal satu", cat:"waktu", e:"Kanji: 一日 = 一 (ichi, satu) + 日 (nichi, hari)."},
+  {jp:"ふつか", id:"tanggal dua", cat:"waktu", e:"Kanji: 二日 = 二 (futsu, dua) + 日 (ka, hari)."},
+  {jp:"みっか", id:"tanggal tiga", cat:"waktu", e:"Kanji: 三日 = 三 (mi, tiga) + 日 (ka, hari)."},
+  {jp:"よっか", id:"tanggal empat", cat:"waktu", e:"Kanji: 四日 = 四 (yo, empat) + 日 (ka, hari)."},
+  {jp:"いつか", id:"tanggal lima", cat:"waktu", e:"Kanji: 五日 = 五 (itsu, lima) + 日 (ka, hari)."},
+  {jp:"むいか", id:"tanggal enam", cat:"waktu", e:"Kanji: 六日 = 六 (mui, enam) + 日 (ka, hari)."},
+  {jp:"なのか", id:"tanggal tujuh", cat:"waktu", e:"Kanji: 七日 = 七 (nano, tujuh) + 日 (ka, hari)."},
+  {jp:"ようか", id:"tanggal delapan", cat:"waktu", e:"Kanji: 八日 = 八 (you, delapan) + 日 (ka, hari)."},
+  {jp:"ここのか", id:"tanggal sembilan", cat:"waktu", e:"Kanji: 九日 = 九 (kokono, sembilan) + 日 (ka, hari)."},
+  {jp:"とおか", id:"tanggal sepuluh", cat:"waktu", e:"Kanji: 十日 = 十 (tou, sepuluh) + 日 (ka, hari)."},
+  {jp:"じゅうよっか", id:"tanggal empat belas", cat:"waktu", e:"Kanji: 十四日 = 十 (juu, sepuluh) + 四 (yo, empat) + 日 (ka, hari)."},
+  {jp:"はつか", id:"tanggal dua puluh", cat:"waktu", e:"Kanji: 二十日 = 二十 (hatsu, dua puluh) + 日 (ka, hari)."},
+  {jp:"にじゅうよっか", id:"tanggal dua puluh empat", cat:"waktu", e:"Kanji: 二十四日 = 二十 (ni-juu, dua puluh) + 四 (yo, empat) + 日 (ka, hari)."},
+  {jp:"～にち", id:"tanggal —", cat:"waktu", e:"Kanji: ～日 = 日 (nichi, hari)."},
+  {jp:"なんにち", id:"tanggal berapa", cat:"waktu", e:"Kanji: 何日 = 何 (nan, apa) + 日 (nichi, hari)."},
+  {jp:"いつ", id:"kapan", cat:"waktu", e:"Kata tanya waktu: kapan."},
+  {jp:"たんじょうび", id:"hari ulang tahun", cat:"waktu", e:"Kanji: 誕生日 = 誕 (tan, lahir) + 生 (jou, hidup) + 日 (bi, hari)."},
+
+  // ===== UNGKAPAN =====
+  {jp:"そうですね", id:"ya, betul", cat:"ungkapan", e:"Ungkapan setuju atau konfirmasi: 'Ya, benar.'"},
+  {jp:"［どうも］ありがとう ございました", id:"terima kasih (banyak)", cat:"ungkapan", e:"Ungkapan sopan untuk berterima kasih."},
+  {jp:"どう いたしまして", id:"sama-sama", cat:"ungkapan", e:"Balasan untuk terima kasih."},
+
+  // ===== LAIN-LAIN =====
+  {jp:"－ばんせん", id:"peron nomor —", cat:"lain-lain", e:"Kanji: 番線 = 番 (ban, nomor) + 線 (sen, jalur)."},
+  {jp:"つぎの", id:"yang berikutnya", cat:"lain-lain", e:"Kanji: 次の = 次 (tsugi, berikut)."},
+  {jp:"ふつう", id:"biasa", cat:"lain-lain", e:"Kanji: 普通 = 普 (fu, umum) + 通 (tsuu, lewat)."},
+  {jp:"きゅうこう", id:"ekspres", cat:"lain-lain", e:"Kanji: 急行 = 急 (kyuu, cepat) + 行 (kou, pergi)."},
+  {jp:"とっきゅう", id:"super ekspres", cat:"lain-lain", e:"Kanji: 特急 = 特 (toku, khusus) + 急 (kyuu, cepat)."},
+  {jp:"こうべ", id:"Kobe", cat:"tempat", e:"Kanji: 神戸 = 神 (kou, dewa) + 戸 (be, pintu). = Kota Kobe di dekat Osaka."},
+  {jp:"おおさか", id:"Osaka", cat:"tempat", e:"Kanji: 大阪 = 大 (oo, besar) + 阪 (saka, bukit). = Osaka."}
+];
+
+const allWordsBab6 = [
+  // ===== KATA KERJA =====
+  {jp:"たべます", id:"makan", cat:"kata kerja", e:"Kanji: 食べます = 食 (ta, makan). = makan."},
+  {jp:"のみます", id:"minum", cat:"kata kerja", e:"Kanji: 飲みます = 飲 (no, minum). = minum."},
+  {jp:"すいます（たばこを〜）", id:"mengisap [rokok]", cat:"kata kerja", e:"Kanji: 吸います = 吸 (sui, mengisap). = mengisap rokok."},
+  {jp:"みます", id:"melihat, menonton", cat:"kata kerja", e:"Kanji: 見ます = 見 (mi, melihat)."},
+  {jp:"ききます", id:"mendengar", cat:"kata kerja", e:"Kanji: 聞きます = 聞 (kiki, mendengar)."},
+  {jp:"よみます", id:"membaca", cat:"kata kerja", e:"Kanji: 読みます = 読 (yomi, membaca)."},
+  {jp:"かきます", id:"menulis, menggambar", cat:"kata kerja", e:"Kanji: 書きます = 書 (kaki, menulis). Bisa juga berarti menggambar."},
+  {jp:"かいます", id:"membeli", cat:"kata kerja", e:"Kanji: 買います = 買 (kai, beli)."},
+  {jp:"とります", id:"mengambil (foto)", cat:"kata kerja", e:"Kanji: 撮ります = 撮 (tori, mengambil). Biasanya digunakan untuk mengambil foto."},
+  {jp:"します", id:"mengerjakan, melakukan, berbuat", cat:"kata kerja", e:"Kanji: します = melakukan suatu kegiatan."},
+  {jp:"あいます（ともだちに〜）", id:"bertemu [dengan teman]", cat:"kata kerja", e:"Kanji: 会います = 会 (ai, bertemu)."},
+
+  // ===== MAKANAN & MINUMAN =====
+  {jp:"ごはん", id:"nasi", cat:"makanan", e:"Kanji: ご飯 = ご (prefiks sopan) + 飯 (han, nasi/makan)."},
+  {jp:"あさごはん", id:"sarapan", cat:"makanan", e:"Kanji: 朝ご飯 = 朝 (asa, pagi) + ご飯 (makan)."},
+  {jp:"ひるごはん", id:"makan siang", cat:"makanan", e:"Kanji: 昼ご飯 = 昼 (hiru, siang) + ご飯 (makan)."},
+  {jp:"ばんごはん", id:"makan malam", cat:"makanan", e:"Kanji: 晩ご飯 = 晩 (ban, malam) + ご飯 (makan)."},
+  {jp:"パン", id:"roti", cat:"makanan", e:"Roti (loanword dari bahasa Portugis 'pão')."},
+  {jp:"たまご", id:"telur", cat:"makanan", e:"Kanji: 卵 = 卵 (tamago, telur)."},
+  {jp:"にく", id:"daging", cat:"makanan", e:"Kanji: 肉 = 肉 (niku, daging)."},
+  {jp:"さかな", id:"ikan", cat:"makanan", e:"Kanji: 魚 = 魚 (sakana, ikan)."},
+  {jp:"やさい", id:"sayur", cat:"makanan", e:"Kanji: 野菜 = 野 (no, ladang) + 菜 (sai, sayur)."},
+  {jp:"くだもの", id:"buah-buahan", cat:"makanan", e:"Kanji: 果物 = 果 (ka, buah) + 物 (mono, benda)."},
+  {jp:"みず", id:"air", cat:"minuman", e:"Kanji: 水 = 水 (mizu, air)."},
+  {jp:"おちゃ", id:"teh, teh Jepang (teh hijau)", cat:"minuman", e:"Kanji: お茶 = お (prefiks sopan) + 茶 (cha, teh)."},
+  {jp:"こうちゃ", id:"teh hitam", cat:"minuman", e:"Kanji: 紅茶 = 紅 (kou, merah) + 茶 (cha, teh)."},
+  {jp:"ぎゅうにゅう（ミルク）", id:"susu", cat:"minuman", e:"Kanji: 牛乳 = 牛 (gyuu, sapi) + 乳 (nyuu, susu)."},
+  {jp:"ジュース", id:"jus, sari buah", cat:"minuman", e:"Jus (loanword dari Inggris 'juice')."},
+  {jp:"ビール", id:"bir", cat:"minuman", e:"Bir (loanword dari bahasa Belanda 'bier')."},
+  {jp:"［お］さけ", id:"minuman keras (sake)", cat:"minuman", e:"Kanji: お酒 = 酒 (sake, alkohol)."},
+  {jp:"たばこ", id:"rokok", cat:"lain-lain", e:"Tembakau/rokok. Dalam bahasa Jepang berasal dari kata Portugis 'tabaco'."},
+
+  // ===== BENDA =====
+  {jp:"てがみ", id:"surat", cat:"benda", e:"Kanji: 手紙 = 手 (te, tangan) + 紙 (gami, kertas)."},
+  {jp:"レポート", id:"laporan", cat:"benda", e:"Loanword dari 'report'."},
+  {jp:"しゃしん", id:"foto", cat:"benda", e:"Kanji: 写真 = 写 (sha, menyalin) + 真 (shin, nyata)."},
+  {jp:"ビデオ", id:"kaset video, VHS", cat:"benda", e:"Video tape, digunakan untuk merekam."},
+  {jp:"みせ", id:"toko", cat:"tempat", e:"Kanji: 店 = 店 (mise, toko)."},
+  {jp:"にわ", id:"halaman", cat:"tempat", e:"Kanji: 庭 = 庭 (niwa, halaman)."},
+  {jp:"しゅくだい", id:"pekerjaan rumah (PR)", cat:"benda", e:"Kanji: 宿題 = 宿 (shuku, tempat menginap) + 題 (dai, tugas)."},
+  {jp:"テニス", id:"tenis", cat:"olahraga", e:"Olahraga tenis."},
+  {jp:"サッカー", id:"sepak bola", cat:"olahraga", e:"Olahraga sepak bola."},
+  {jp:"［お］はなみ", id:"melihat bunga sakura (hanami)", cat:"budaya", e:"Kanji: 花見 = 花 (hana, bunga) + 見 (mi, melihat)."},
+  
+  // ===== KATA TANYA DAN UNGKAPAN =====
+  {jp:"なに", id:"apa", cat:"kata tanya", e:"Kanji: 何 = 何 (nani, apa)."},
+  {jp:"いっしょに", id:"bersama-sama", cat:"ungkapan", e:"Bersama melakukan sesuatu."},
+  {jp:"ちょっと", id:"sebentar, sedikit", cat:"ungkapan", e:"Ungkapan sopan untuk menolak secara halus atau menyatakan sedikit waktu."},
+  {jp:"いつも", id:"selalu", cat:"ungkapan", e:"Selalu, kebiasaan rutin."},
+  {jp:"ときどき", id:"kadang-kadang", cat:"ungkapan", e:"Kadang-kadang, tidak selalu."},
+  {jp:"それから", id:"setelah itu, kemudian", cat:"ungkapan", e:"Kata sambung urutan kegiatan."},
+  {jp:"ええ", id:"ya", cat:"ungkapan", e:"Versi santai dari はい (hai)."},
+  {jp:"いいですね", id:"bagus ya / baik ya", cat:"ungkapan", e:"Ekspresi persetujuan atau kekaguman."},
+  {jp:"わかりました", id:"mengerti / baik", cat:"ungkapan", e:"Kanji: 分かりました = 分 (waka, mengerti)."},
+  {jp:"なんですか", id:"apa?", cat:"kata tanya", e:"Digunakan untuk menanyakan sesuatu secara sopan."},
+  {jp:"じゃ、また［あした］", id:"ok, sampai jumpa [besok]", cat:"ungkapan", e:"Ungkapan perpisahan santai."},
+
+  // ===== NAMA TEMPAT & FIKSI =====
+  {jp:"メキシコ", id:"Meksiko", cat:"tempat", e:"Negara Meksiko."},
+  {jp:"おおさかデパート", id:"toserba fiksi", cat:"tempat", e:"Department store fiksi di Osaka."},
+  {jp:"つや", id:"restoran fiksi", cat:"tempat", e:"Restoran fiksi dalam buku Minna no Nihongo."},
+  {jp:"フランスや", id:"pasar swalayan fiksi", cat:"tempat", e:"Pasar swalayan fiksi dalam buku."},
+  {jp:"はなや", id:"toko bunga fiksi", cat:"tempat", e:"Toko bunga fiksi dalam latihan."}
+];
+
+const allWordsBab7 = [
+  {jp:"きります",id:"menggunting",cat:"kata kerja",e:"Kanji: 切ります = 切 (kiri, potong). = memotong, menggunting."},
+  {jp:"おくります",id:"mengirim",cat:"kata kerja",e:"Kanji: 送ります = 送 (okuri, kirim). = mengirim."},
+  {jp:"あげます",id:"memberikan",cat:"kata kerja",e:"Kanji: 上げます = 上 (age, memberi ke orang lain)."},
+  {jp:"もらいます",id:"menerima",cat:"kata kerja",e:"Kanji: 貰います (hiragana dipakai di buku). = menerima dari orang lain."},
+  {jp:"かします",id:"meminjamkan",cat:"kata kerja",e:"Kanji: 貸します = 貸 (kashi, pinjamkan)."},
+  {jp:"かります",id:"meminjam",cat:"kata kerja",e:"Kanji: 借ります = 借 (kari, pinjam)."},
+  {jp:"おしえます",id:"mengajar",cat:"kata kerja",e:"Kanji: 教えます = 教 (oshie, ajar)."},
+  {jp:"ならいます",id:"belajar",cat:"kata kerja",e:"Kanji: 習います = 習 (narai, belajar)."},
+  {jp:"かけます（でんわを）",id:"menelepon",cat:"kata kerja",e:"Kanji: 掛けます = 電話をかけます = menelepon."},
+
+  {jp:"て",id:"tangan",cat:"benda",e:"Kanji: 手 = tangan."},
+  {jp:"はし",id:"sumpit",cat:"benda",e:"Kanji: 箸 = sumpit."},
+  {jp:"スプーン",id:"sendok",cat:"benda",e:"Serapan dari 'spoon'."},
+  {jp:"ナイフ",id:"pisau",cat:"benda",e:"Serapan dari 'knife'."},
+  {jp:"フォーク",id:"garpu",cat:"benda",e:"Serapan dari 'fork'."},
+  {jp:"はさみ",id:"gunting",cat:"benda",e:"Kanji: 鋏 (biasanya hiragana)."},
+  {jp:"パソコン",id:"komputer, PC",cat:"benda",e:"Singkatan dari 'personal computer'."},
+  {jp:"ケータイ",id:"HP",cat:"benda",e:"Kependekan dari 携帯電話 (keitai denwa)."},
+  {jp:"メール",id:"e-mail",cat:"benda",e:"Serapan dari 'mail'."},
+  {jp:"ねんがじょう",id:"kartu tahun baru",cat:"benda",e:"Kanji: 年賀状 = kartu ucapan tahun baru."},
+  {jp:"パンチ",id:"pelubang kertas",cat:"benda",e:"Serapan dari 'punch'."},
+  {jp:"ホッチキス",id:"stapler",cat:"benda",e:"Serapan dari merek Hotchkiss."},
+  {jp:"セロテープ",id:"selotip",cat:"benda",e:"Serapan dari merek Cellotape."},
+  {jp:"けしゴム",id:"penghapus karet",cat:"benda",e:"Kanji: 消しゴム = penghapus (karet)."},
+  {jp:"かみ",id:"kertas",cat:"benda",e:"Kanji: 紙 = kertas."},
+  {jp:"はな",id:"bunga",cat:"benda",e:"Kanji: 花 = bunga."},
+  {jp:"シャツ",id:"kemeja",cat:"benda",e:"Serapan dari 'shirt'."},
+  {jp:"プレゼント",id:"kado, hadiah",cat:"benda",e:"Serapan dari 'present'."},
+  {jp:"にもつ",id:"barang",cat:"benda",e:"Kanji: 荷物 = barang bawaan."},
+  {jp:"おかね",id:"uang",cat:"benda",e:"Kanji: お金 = uang."},
+  {jp:"きっぷ",id:"karcis",cat:"benda",e:"Kanji: 切符 = tiket."},
+  {jp:"クリスマス",id:"Natal",cat:"benda",e:"Serapan dari 'Christmas'."},
+  {jp:"ちち",id:"ayah",cat:"orang",e:"Kanji: 父 = ayah kandung sendiri."},
+  {jp:"はは",id:"ibu",cat:"orang",e:"Kanji: 母 = ibu kandung sendiri."},
+  {jp:"おとうさん",id:"ayah (sapaan sopan)",cat:"orang",e:"Kanji: お父さん = ayah orang lain atau panggilan sopan."},
+  {jp:"おかあさん",id:"ibu (sapaan sopan)",cat:"orang",e:"Kanji: お母さん = ibu orang lain atau panggilan sopan."},
+
+  {jp:"もう",id:"sudah",cat:"ekspresi",e:"Keterangan waktu bermakna ‘sudah’."},
+  {jp:"まだ",id:"belum",cat:"ekspresi",e:"Keterangan waktu bermakna ‘belum’, biasanya diikuti kalimat negatif."},
+  {jp:"これから",id:"mulai dari sekarang",cat:"ekspresi",e:"Ungkapan waktu memulai sesuatu dari sekarang."},
+  {jp:"すてきですね",id:"indah ya / bagus ya",cat:"ekspresi",e:"Kanji: 素敵ですね = pujian ‘bagus/indah ya’."},
+  {jp:"いらっしゃい",id:"selamat datang",cat:"ekspresi",e:"Ungkapan penyambutan tamu."},
+  {jp:"どうぞ おあがりください",id:"silakan masuk",cat:"ekspresi",e:"Ungkapan sopan untuk mempersilakan tamu masuk rumah."},
+  {jp:"しつれいします",id:"permisi",cat:"ekspresi",e:"Kanji: 失礼します = permisi / maaf mengganggu."},
+  {jp:"〜は いかがですか",id:"bagaimana [~]? (menawarkan sesuatu)",cat:"ekspresi",e:"Ungkapan menawarkan sesuatu dengan sopan."},
+  {jp:"いただきます",id:"selamat makan (sebelum makan)",cat:"ekspresi",e:"Ungkapan sebelum makan berarti ‘saya menerima dengan hormat’."},
+  {jp:"ごちそうさまでした",id:"terima kasih atas hidangannya",cat:"ekspresi",e:"Ungkapan sesudah makan, terima kasih atas hidangan."},
+  {jp:"スペイン",id:"Spanyol",cat:"ekspresi",e:"Nama negara: Spanyol (スペイン)."}
+];
+
+const allWordsBab8 = [
+  // ===== KATA SIFAT (NA・I) =====
+  {jp:"ハンサム［な］", id:"tampan, gagah, ganteng", cat:"sifat (na)", e:"Kata sifat na; digunakan untuk menggambarkan laki-laki berpenampilan baik."},
+  {jp:"きれい［な］", id:"cantik, bersih", cat:"sifat (na)", e:"Kata sifat na; bisa berarti 'cantik' atau 'bersih' tergantung konteks."},
+  {jp:"しずか［な］", id:"tenang, sunyi", cat:"sifat (na)", e:"Kanji: 静か = 静 (shizu, tenang)."},
+  {jp:"にぎやか［な］", id:"ramai", cat:"sifat (na)", e:"Kanji: 賑やか = ramai; digunakan untuk tempat, suasana."},
+  {jp:"ゆうめい［な］", id:"terkenal", cat:"sifat (na)", e:"Kanji: 有名 = 有 (yuu, memiliki) + 名 (mei, nama)."},
+  {jp:"しんせつ［な］", id:"baik hati", cat:"sifat (na)", e:"Kanji: 親切 = 親 (shin, orang tua) + 切 (setsu, potong). Tidak dipakai untuk keluarga sendiri."},
+  {jp:"げんき［な］", id:"sehat, bersemangat", cat:"sifat (na)", e:"Kanji: 元気 = 元 (gen, asal) + 気 (ki, semangat)."},
+  {jp:"ひま［な］", id:"senggang, waktu luang", cat:"sifat (na)", e:"Kanji: 暇 = memiliki waktu kosong."},
+  {jp:"べんり［な］", id:"praktis", cat:"sifat (na)", e:"Kanji: 便利 = 便 (ben, kemudahan) + 利 (ri, manfaat)."},
+  {jp:"すてき［な］", id:"bagus, indah", cat:"sifat (na)", e:"Bisa berarti bagus, menarik, atau menawan."},
+
+  // ===== KATA SIFAT (I) =====
+  {jp:"おおきい", id:"besar", cat:"sifat (i)", e:"Kanji: 大きい = 大 (oo, besar)."},
+  {jp:"ちいさい", id:"kecil", cat:"sifat (i)", e:"Kanji: 小さい = 小 (chi, kecil)."},
+  {jp:"あたらしい", id:"baru", cat:"sifat (i)", e:"Kanji: 新しい = 新 (atarashi, baru)."},
+  {jp:"ふるい", id:"lama, tua (benda)", cat:"sifat (i)", e:"Kanji: 古い = 古 (furu, lama)."},
+  {jp:"いい（よい）", id:"baik, bagus", cat:"sifat (i)", e:"Kanji: 良い = 良 (yoi, baik)."},
+  {jp:"わるい", id:"buruk, jelek", cat:"sifat (i)", e:"Kanji: 悪い = 悪 (warui, buruk)."},
+  {jp:"あつい", id:"panas (udara/benda)", cat:"sifat (i)", e:"Kanji: 暑い / 熱い = bisa untuk udara atau benda."},
+  {jp:"さむい", id:"dingin (udara)", cat:"sifat (i)", e:"Kanji: 寒い = digunakan untuk suhu udara."},
+  {jp:"つめたい", id:"dingin (benda)", cat:"sifat (i)", e:"Kanji: 冷たい = digunakan untuk rasa atau benda dingin."},
+  {jp:"むずかしい", id:"sulit, susah", cat:"sifat (i)", e:"Kanji: 難しい = 難 (muzuka, sulit)."},
+  {jp:"やさしい", id:"mudah, gampang / baik hati", cat:"sifat (i)", e:"Kanji: 易しい / 優しい, tergantung konteks."},
+  {jp:"たかい", id:"mahal, tinggi", cat:"sifat (i)", e:"Kanji: 高い = 高 (taka, tinggi)."},
+  {jp:"やすい", id:"murah", cat:"sifat (i)", e:"Kanji: 安い = 安 (yasu, murah)."},
+  {jp:"ひくい", id:"rendah", cat:"sifat (i)", e:"Kanji: 低い = 低 (hiku, rendah)."},
+  {jp:"おもしろい", id:"menarik, lucu", cat:"sifat (i)", e:"Kanji: 面白い = 面 (men, permukaan) + 白 (shiro, putih) → menarik secara kiasan."},
+  {jp:"いそがしい", id:"sibuk", cat:"sifat (i)", e:"Kanji: 忙しい = 忙 (isoga, sibuk)."},
+  {jp:"たのしい", id:"senang, menyenangkan", cat:"sifat (i)", e:"Kanji: 楽しい = 楽 (tano, senang)."},
+  {jp:"しろい", id:"putih", cat:"sifat (i)", e:"Kanji: 白い = 白 (shiro, putih)."},
+  {jp:"くろい", id:"hitam", cat:"sifat (i)", e:"Kanji: 黒い = 黒 (kuro, hitam)."},
+  {jp:"あかい", id:"merah", cat:"sifat (i)", e:"Kanji: 赤い = 赤 (aka, merah)."},
+  {jp:"あおい", id:"biru", cat:"sifat (i)", e:"Kanji: 青い = 青 (ao, biru)."},
+
+  // ===== BENDA & TEMPAT =====
+  {jp:"さくら", id:"bunga sakura", cat:"benda", e:"Kanji: 桜 = sakura, bunga khas Jepang."},
+  {jp:"やま", id:"gunung", cat:"tempat", e:"Kanji: 山 = 山 (yama, gunung)."},
+  {jp:"まち", id:"kota", cat:"tempat", e:"Kanji: 町 = 町 (machi, kota)."},
+  {jp:"たべもの", id:"makanan", cat:"benda", e:"Kanji: 食べ物 = 食 (ta, makan) + 物 (mono, benda)."},
+  {jp:"ところ", id:"tempat", cat:"tempat", e:"Kanji: 所 = 所 (tokoro, tempat)."},
+  {jp:"りょう", id:"asrama", cat:"tempat", e:"Kanji: 寮 = asrama."},
+  {jp:"レストラン", id:"restoran", cat:"tempat", e:"Tempat makan umum."},
+  {jp:"せいかつ", id:"kehidupan sehari-hari", cat:"lain-lain", e:"Kanji: 生活 = 生 (sei, hidup) + 活 (katsu, kehidupan)."},
+  {jp:"［お］しごと", id:"pekerjaan", cat:"pekerjaan", e:"Kanji: 仕事 = 仕 (shi, tugas) + 事 (goto, hal)."},
+  
+  // ===== KATA TANYA DAN UNGKAPAN =====
+  {jp:"どう", id:"bagaimana", cat:"kata tanya", e:"Kata tanya untuk keadaan atau kesan."},
+  {jp:"どんな〜", id:"yang bagaimana", cat:"kata tanya", e:"Digunakan untuk menanyakan sifat atau jenis."},
+  {jp:"とても", id:"sangat, sekali", cat:"ungkapan", e:"Digunakan untuk menekankan sifat positif/negatif."},
+  {jp:"あまり", id:"kurang begitu (negatif)", cat:"ungkapan", e:"Biasanya diikuti bentuk negatif: あまり よく ない = tidak begitu bagus."},
+
+  // ===== UNGKAPAN KAIWA =====
+  {jp:"おげんきですか", id:"apa kabar?", cat:"ungkapan", e:"Digunakan untuk menanyakan kabar secara sopan."},
+  {jp:"そうですね", id:"begitu ya / ya, benar", cat:"ungkapan", e:"Digunakan untuk menanggapi percakapan."},
+  {jp:"［〜、］もう いっぱい いかがですか", id:"mau tambah segelas lagi?", cat:"ungkapan", e:"Dipakai saat menawarkan makanan/minuman."},
+  {jp:"［いいえ、］けっこうです", id:"tidak, terima kasih", cat:"ungkapan", e:"Penolakan sopan terhadap tawaran."},
+  {jp:"もう〜ですね", id:"sudah ~ ya?", cat:"ungkapan", e:"Ungkapan waktu; menunjukkan sesuatu sudah terjadi."},
+  {jp:"そろそろ しつれいします", id:"saya pamit dulu", cat:"ungkapan", e:"Dipakai saat berpamitan dengan sopan."},
+  {jp:"また いらっしゃって ください", id:"silakan datang lagi", cat:"ungkapan", e:"Kalimat sapaan untuk pelanggan/tamu."},
+
+  // ===== TEMPAT & NAMA =====
+  {jp:"シャンハイ", id:"Shanghai", cat:"tempat", e:"Kota Shanghai, Tiongkok."},
+  {jp:"きんかくじ", id:"kuil Kinkakuji", cat:"tempat", e:"Kanji: 金閣寺 = 金 (kin, emas) + 閣寺 (kuil)."},
+  {jp:"ならこうえん", id:"taman Nara", cat:"tempat", e:"Kanji: 奈良公園 = taman terkenal di Nara dengan rusa jinak."},
+  {jp:"ふじさん", id:"gunung Fuji", cat:"tempat", e:"Kanji: 富士山 = gunung tertinggi di Jepang."},
+  {jp:"「しちにんの さむらい」", id:"Tujuh Samurai (film)", cat:"budaya", e:"Film klasik Jepang karya Akira Kurosawa."}
+];
+
+const allWordsBab9 = [
+  // ===== KATA KERJA =====
+  {jp:"わかります", id:"mengerti, paham", cat:"kata kerja", e:"Kanji: 分かります = 分 (waka, mengerti)."},
+  {jp:"あります", id:"ada (benda mati)", cat:"kata kerja", e:"Kanji: 有ります / 在ります = digunakan untuk benda mati dan acara."},
+
+  // ===== KESUKAAN & HOBI =====
+  {jp:"すき［な］", id:"suka", cat:"sifat (na)", e:"Kanji: 好き = 好 (suki, suka)."},
+  {jp:"きらい［な］", id:"tidak suka", cat:"sifat (na)", e:"Kanji: 嫌い = 嫌 (kirai, benci)."},
+  {jp:"じょうず［な］", id:"pandai, mahir", cat:"sifat (na)", e:"Kanji: 上手 = 上 (jou, atas) + 手 (zu, tangan)."},
+  {jp:"へた［な］", id:"tidak pandai", cat:"sifat (na)", e:"Kanji: 下手 = 下 (he, bawah) + 手 (ta, tangan)."},
+  {jp:"りょうり", id:"masakan", cat:"hobi", e:"Kanji: 料理 = 料 (ryou, bahan) + 理 (ri, logika)."},
+  {jp:"のみもの", id:"minuman", cat:"benda", e:"Kanji: 飲み物 = 飲 (no, minum) + 物 (mono, benda)."},
+  {jp:"スポーツ", id:"olahraga", cat:"hobi", e:"Dari bahasa Inggris 'sports'."},
+  {jp:"やきゅう", id:"baseball", cat:"hobi", e:"Kanji: 野球 = 野 (ya, lapangan) + 球 (kyuu, bola)."},
+  {jp:"ダンス", id:"tarian", cat:"hobi", e:"Dari bahasa Inggris 'dance'."},
+  {jp:"おんがく", id:"musik", cat:"hobi", e:"Kanji: 音楽 = 音 (on, suara) + 楽 (gaku, kesenangan)."},
+  {jp:"うた", id:"lagu", cat:"hobi", e:"Kanji: 歌 = 歌 (uta, lagu)."},
+  {jp:"クラシック", id:"musik klasik", cat:"hobi", e:"Dari bahasa Inggris 'classical'."},
+  {jp:"ジャズ", id:"musik jazz", cat:"hobi", e:"Dari bahasa Inggris 'jazz'."},
+  {jp:"コンサート", id:"konser", cat:"hobi", e:"Dari bahasa Inggris 'concert'."},
+  {jp:"カラオケ", id:"karaoke", cat:"hobi", e:"Kata asli Jepang: 空 (kara, kosong) + オーケストラ (orchestra)."},
+  {jp:"かぶき", id:"kabuki (drama tradisional Jepang)", cat:"budaya", e:"Kanji: 歌舞伎 = teater tradisional Jepang dengan tarian dan musik."},
+  {jp:"え", id:"lukisan, gambar", cat:"hobi", e:"Kanji: 絵 = gambar, lukisan."},
+  {jp:"じ", id:"huruf kanji, tulisan", cat:"bahasa", e:"Kanji: 字 = huruf, karakter."},
+  {jp:"かんじ", id:"kanji (huruf Cina)", cat:"bahasa", e:"Kanji: 漢字 = 漢 (kan, Tiongkok) + 字 (ji, huruf)."},
+
+  // ===== HAL / KEJADIAN =====
+  {jp:"ローマじ", id:"huruf latin (romaji)", cat:"bahasa", e:"ローマ字 = huruf Romawi."},
+  {jp:"こまかい おかね", id:"uang receh", cat:"uang", e:"Kanji: 細かいお金 = uang koin atau pecahan kecil."},
+  {jp:"チケット", id:"tiket", cat:"benda", e:"Dari bahasa Inggris 'ticket'."},
+
+  // ===== WAKTU LUANG / RUTINITAS =====
+  {jp:"じかん", id:"waktu", cat:"waktu", e:"Kanji: 時間 = waktu (durasi)."},
+  {jp:"ようじ", id:"urusan, kepentingan", cat:"aktivitas", e:"Kanji: 用事 = 用 (you, keperluan) + 事 (ji, hal)."},
+  {jp:"やくそく", id:"janji", cat:"aktivitas", e:"Kanji: 約束 = 約 (yaku, perjanjian) + 束 (soku, ikatan)."},
+
+  // ===== ORANG =====
+  {jp:"ごしゅじん", id:"suami (orang lain)", cat:"orang", e:"Kanji: ご主人 = ご (prefiks sopan) + 主人 (shujin, suami)."},
+  {jp:"おっと／しゅじん", id:"suami (sendiri)", cat:"orang", e:"Kanji: 夫／主人 = digunakan untuk menyebut suami sendiri."},
+  {jp:"おくさん", id:"istri (orang lain)", cat:"orang", e:"Kanji: 奥さん = 奥 (oku, dalam) + さん (sapaan)."},
+  {jp:"つま／かない", id:"istri (sendiri)", cat:"orang", e:"Kanji: 妻／家内 = istri sendiri."},
+  {jp:"こども", id:"anak, anak-anak", cat:"orang", e:"Kanji: 子供 = 子 (ko, anak) + 供 (domo, bersama)."},
+  {jp:"よく", id:"sering", cat:"keterangan", e:"Menunjukkan frekuensi kegiatan."},
+  {jp:"だいたい", id:"umumnya, sebagian besar", cat:"keterangan", e:"Bisa berarti 'kira-kira' atau 'secara umum'."},
+  {jp:"たくさん", id:"banyak", cat:"keterangan", e:"Menunjukkan jumlah banyak."},
+  {jp:"すこし", id:"sedikit", cat:"keterangan", e:"Kanji: 少し = sedikit."},
+  {jp:"ぜんぜん", id:"sama sekali tidak", cat:"keterangan", e:"Biasanya diikuti kata negatif."},
+  {jp:"はやく", id:"cepat, dini", cat:"keterangan", e:"Kanji: 早く = 早 (haya, cepat) + く (penanda adverbia)."},
+
+  // ===== UNGKAPAN =====
+  {jp:"どうして", id:"mengapa, kenapa", cat:"kata tanya", e:"Kanji: 如何して = mengapa, alasan sesuatu."},
+  {jp:"〜から", id:"karena ~", cat:"partikel", e:"Digunakan untuk menyatakan alasan atau sebab."},
+  {jp:"ざんねんです［ね］", id:"sayang sekali", cat:"ungkapan", e:"Ungkapan untuk menyatakan penyesalan atau simpati."},
+  {jp:"すみません", id:"maaf, permisi", cat:"ungkapan", e:"Ungkapan sopan."},
+  {jp:"もしもし", id:"halo (di telepon)", cat:"ungkapan", e:"Digunakan saat membuka percakapan di telepon."},
+  {jp:"ああ", id:"oh begitu (saat mengerti)", cat:"ungkapan", e:"Ekspresi paham atau terkejut."},
+  {jp:"いっしょに いかがですか", id:"bagaimana kalau bersama-sama?", cat:"ungkapan", e:"Mengajak orang lain dengan sopan."},
+  {jp:"［〜は］ちょっと……", id:"maaf, agak sulit (penolakan halus)", cat:"ungkapan", e:"Penolakan secara halus terhadap ajakan."},
+  {jp:"だめですか", id:"tidak boleh ya?", cat:"ungkapan", e:"Memastikan apakah sesuatu tidak bisa dilakukan."},
+  {jp:"また こんど おねがいします", id:"lain kali saja, ya", cat:"ungkapan", e:"Ungkapan menolak ajakan dengan sopan."}
+];
+
+const allWordsBab10 = [
+  // ===== KATA BENDA: TEMPAT =====
+  {jp:"あります", id:"ada (benda mati)", cat:"kata kerja", e:"Kanji: 有ります / 在ります = digunakan untuk benda mati dan acara."},
+  {jp:"います", id:"ada (makhluk hidup)", cat:"kata kerja", e:"Kanji: 居ます = digunakan untuk orang atau hewan."},
+  {jp:"いろいろ［な］", id:"bermacam-macam", cat:"sifat (na)", e:"Kanji: 色々 = banyak jenis."},
+  {jp:"おとこのひと", id:"laki-laki", cat:"orang", e:"Kanji: 男の人 = laki-laki (netral/sopan)."},
+  {jp:"おんなのひと", id:"perempuan", cat:"orang", e:"Kanji: 女の人 = perempuan (netral/sopan)."},
+  {jp:"おとこのこ", id:"anak laki-laki", cat:"orang", e:"Kanji: 男の子 = anak laki-laki."},
+  {jp:"おんなのこ", id:"anak perempuan", cat:"orang", e:"Kanji: 女の子 = anak perempuan."},
+  {jp:"いぬ", id:"anjing", cat:"hewan", e:"Kanji: 犬 = anjing."},
+  {jp:"ねこ", id:"kucing", cat:"hewan", e:"Kanji: 猫 = kucing."},
+  {jp:"ぞう", id:"gajah", cat:"hewan", e:"Kanji: 象 = gajah."},
+  {jp:"き", id:"pohon", cat:"alam", e:"Kanji: 木 = pohon."},
+  {jp:"もの", id:"benda, barang", cat:"benda", e:"Kanji: 物 = benda, barang."},
+  {jp:"フィルム", id:"film", cat:"benda", e:"Dari bahasa Inggris 'film'."},
+  {jp:"でんち", id:"baterai", cat:"benda", e:"Kanji: 電池 = 電 (den, listrik) + 池 (chi, kolam)."},
+  {jp:"はこ", id:"kotak", cat:"benda", e:"Kanji: 箱 = kotak."},
+  {jp:"スイッチ", id:"saklar", cat:"benda", e:"Dari bahasa Inggris 'switch'."},
+  {jp:"れいぞうこ", id:"lemari es", cat:"benda", e:"Kanji: 冷蔵庫 = 冷 (rei, dingin) + 蔵 (zou, simpan) + 庫 (ko, gudang)."},
+  {jp:"テーブル", id:"meja", cat:"benda", e:"Dari bahasa Inggris 'table'."},
+  {jp:"ベッド", id:"tempat tidur", cat:"benda", e:"Dari bahasa Inggris 'bed'."},
+  {jp:"たな", id:"rak", cat:"benda", e:"Kanji: 棚 = rak."},
+  {jp:"ドア", id:"pintu", cat:"benda", e:"Dari bahasa Inggris 'door'."},
+  {jp:"まど", id:"jendela", cat:"benda", e:"Kanji: 窓 = jendela."},
+  {jp:"ポスト", id:"kotak surat", cat:"benda", e:"Dari bahasa Inggris 'post'."},
+  {jp:"ビル", id:"gedung", cat:"tempat", e:"Dari bahasa Inggris 'building'."},
+  {jp:"こうえん", id:"taman", cat:"tempat", e:"Kanji: 公園 = taman umum."},
+  {jp:"きっさてん", id:"kedai kopi", cat:"tempat", e:"Kanji: 喫茶店 = 喫 (kitsu, minum) + 茶 (cha, teh) + 店 (ten, toko)."},
+  {jp:"ほんや", id:"toko buku", cat:"tempat", e:"Kanji: 本屋 = toko buku."},
+  {jp:"のりば", id:"tempat naik kendaraan", cat:"tempat", e:"Kanji: 乗り場 = tempat naik (bus/taksi)."},
+  {jp:"けん", id:"prefektur (wilayah administratif Jepang)", cat:"tempat", e:"Kanji: 県 = prefektur Jepang."},
+  
+  // ===== NAMA TEMPAT KHUSUS =====
+  {jp:"うえ", id:"atas", cat:"arah", e:"Kanji: 上 = atas."},
+  {jp:"した", id:"bawah", cat:"arah", e:"Kanji: 下 = bawah."},
+  {jp:"まえ", id:"depan", cat:"arah", e:"Kanji: 前 = depan."},
+  {jp:"うしろ", id:"belakang", cat:"arah", e:"Kanji: 後ろ = belakang."},
+  {jp:"みぎ", id:"kanan", cat:"arah", e:"Kanji: 右 = kanan."},
+  {jp:"ひだり", id:"kiri", cat:"arah", e:"Kanji: 左 = kiri."},
+  {jp:"なか", id:"dalam", cat:"arah", e:"Kanji: 中 = dalam."},
+  {jp:"そと", id:"luar", cat:"arah", e:"Kanji: 外 = luar."},
+  {jp:"となり", id:"sebelah, samping", cat:"arah", e:"Kanji: 隣 = di sebelah / samping."},
+  {jp:"ちかく", id:"dekat", cat:"arah", e:"Kanji: 近く = sekitar / dekat."},
+  {jp:"あいだ", id:"antara", cat:"arah", e:"Kanji: 間 = antara, sela."},
+  
+  // ===== NAMA TEMPAT KHUSUS & FIKSI =====
+  {jp:"〜や", id:"toko ~", cat:"tempat", e:"Contoh: 本屋 = toko buku, 花屋 = toko bunga."},
+  {jp:"の", id:"(penanda kepemilikan atau penghubung)", cat:"partikel", e:"Partikel untuk menghubungkan kata benda."},
+  {jp:"いちばん〜", id:"yang paling ~", cat:"ungkapan", e:"Digunakan untuk menyatakan superlatif."},
+  {jp:"〜だんめ", id:"rak ke ~", cat:"ungkapan", e:"Contoh: いちだんめ = rak pertama."},
+  {jp:"［どうも］すみません", id:"terima kasih / permisi", cat:"ungkapan", e:"Digunakan untuk meminta izin atau mengucapkan terima kasih."},
+  {jp:"チリソース", id:"saus cabai", cat:"makanan", e:"Dari bahasa Inggris 'chili sauce'."},
+  {jp:"スパイス・コーナー", id:"pojok rempah (spice corner)", cat:"tempat", e:"Dari bahasa Inggris 'spice corner'."},
+  {jp:"デパート", id:"toserba", cat:"tempat", e:"Dari bahasa Inggris 'department store'."},
+  {jp:"にほんのせいかつ", id:"kehidupan di Jepang", cat:"ungkapan", e:"Kanji: 日本の生活 = kehidupan sehari-hari di Jepang."},
+  {jp:"（いちばん うえ）", id:"paling atas", cat:"arah", e:"Superlatif dari 上 (atas)."}
+];
+
+const allWordsBab11 = [
+  // ===== KATA KERJA =====
+  {jp:"います", id:"ada, mempunyai [anak]", cat:"kata kerja", e:"Kanji: 居ます = untuk makhluk hidup. Contoh: 子どもがいます (punya anak)."},
+  {jp:"います", id:"ada [di Jepang]", cat:"kata kerja", e:"Kanji: 居ます = digunakan untuk makhluk hidup. Contoh: 日本にいます (ada di Jepang)."},
+  {jp:"かかります", id:"memakan waktu atau uang", cat:"kata kerja", e:"Kanji: 掛かります = butuh, memakan waktu/biaya."},
+  {jp:"やすみます", id:"tidak masuk kerja", cat:"kata kerja", e:"Kanji: 休みます = beristirahat, absen dari pekerjaan."},
+
+  // ===== KATA BILANGAN =====
+  {jp:"ひとつ", id:"satu (benda)", cat:"kata bilangan", e:"Kanji: 一つ = menghitung benda umum."},
+  {jp:"ふたつ", id:"dua (benda)", cat:"kata bilangan", e:"Kanji: 二つ = menghitung benda umum."},
+  {jp:"みっつ", id:"tiga (benda)", cat:"kata bilangan", e:"Kanji: 三つ = menghitung benda umum."},
+  {jp:"よっつ", id:"empat (benda)", cat:"kata bilangan", e:"Kanji: 四つ = menghitung benda umum."},
+  {jp:"いつつ", id:"lima (benda)", cat:"kata bilangan", e:"Kanji: 五つ = menghitung benda umum."},
+  {jp:"むっつ", id:"enam (benda)", cat:"kata bilangan", e:"Kanji: 六つ = menghitung benda umum."},
+  {jp:"ななつ", id:"tujuh (benda)", cat:"kata bilangan", e:"Kanji: 七つ = menghitung benda umum."},
+  {jp:"やっつ", id:"delapan (benda)", cat:"kata bilangan", e:"Kanji: 八つ = menghitung benda umum."},
+  {jp:"ここのつ", id:"sembilan (benda)", cat:"kata bilangan", e:"Kanji: 九つ = menghitung benda umum."},
+  {jp:"とお", id:"sepuluh (benda)", cat:"kata bilangan", e:"Kanji: 十 = menghitung benda umum."},
+  {jp:"いくつ", id:"berapa (benda)", cat:"kata tanya", e:"Kanji: 幾つ = menanyakan jumlah benda."},
+
+  // ===== KATA SATUAN =====
+  {jp:"ひとり", id:"seorang", cat:"satuan orang", e:"Kanji: 一人 = satu orang."},
+  {jp:"ふたり", id:"dua orang", cat:"satuan orang", e:"Kanji: 二人 = dua orang."},
+  {jp:"〜にん", id:"orang (satuan)", cat:"satuan orang", e:"Kanji: 人 = penanda jumlah orang."},
+  {jp:"〜だい", id:"buah (mesin, mobil, dll)", cat:"satuan benda", e:"Kanji: 台 = penghitung mesin, kendaraan."},
+  {jp:"〜まい", id:"lembar (kertas, tiket)", cat:"satuan benda", e:"Kanji: 枚 = penghitung benda tipis seperti kertas, tiket."},
+  {jp:"〜かい", id:"kali (frekuensi)", cat:"satuan benda", e:"Kanji: 回 = penghitung frekuensi."},
+
+  // ===== KATA BENDA =====
+  {jp:"りんご", id:"apel", cat:"benda", e:"Buah apel 🍎."},
+  {jp:"みかん", id:"jeruk", cat:"benda", e:"Buah jeruk."},
+  {jp:"サンドイッチ", id:"sandwich", cat:"makanan", e:"Dari bahasa Inggris 'sandwich'."},
+  {jp:"カレー[ライス]", id:"kari (nasi kari)", cat:"makanan", e:"Dari bahasa Inggris 'curry rice'."},
+  {jp:"アイスクリーム", id:"es krim", cat:"makanan", e:"Dari bahasa Inggris 'ice cream'."},
+  {jp:"きって", id:"perangko", cat:"benda", e:"Kanji: 切手 = perangko."},
+  {jp:"はがき", id:"kartu pos", cat:"benda", e:"Kanji: 葉書 = kartu pos."},
+  {jp:"ふうとう", id:"amplop", cat:"benda", e:"Kanji: 封筒 = amplop surat."},
+  {jp:"りょうしん", id:"orang tua", cat:"keluarga", e:"Kanji: 両親 = kedua orang tua."},
+  {jp:"きょうだい", id:"saudara kandung", cat:"keluarga", e:"Kanji: 兄弟 = kakak adik."},
+  {jp:"あに", id:"kakak laki-laki (sendiri)", cat:"keluarga", e:"Kanji: 兄 = kakak laki-laki sendiri."},
+  {jp:"おにいさん", id:"kakak laki-laki (orang lain)", cat:"keluarga", e:"Sapaan sopan untuk kakak laki-laki orang lain."},
+  {jp:"あね", id:"kakak perempuan (sendiri)", cat:"keluarga", e:"Kanji: 姉 = kakak perempuan sendiri."},
+  {jp:"おねえさん", id:"kakak perempuan (orang lain)", cat:"keluarga", e:"Sapaan sopan untuk kakak perempuan orang lain."},
+  {jp:"おとうと", id:"adik laki-laki (sendiri)", cat:"keluarga", e:"Kanji: 弟 = adik laki-laki sendiri."},
+  {jp:"おとうとさん", id:"adik laki-laki (orang lain)", cat:"keluarga", e:"Sapaan sopan untuk adik laki-laki orang lain."},
+  {jp:"いもうと", id:"adik perempuan (sendiri)", cat:"keluarga", e:"Kanji: 妹 = adik perempuan sendiri."},
+  {jp:"いもうとさん", id:"adik perempuan (orang lain)", cat:"keluarga", e:"Sapaan sopan untuk adik perempuan orang lain."},
+  {jp:"がいこく", id:"luar negeri", cat:"tempat", e:"Kanji: 外国 = negara asing."},
+  {jp:"りゅうがくせい", id:"pelajar asing", cat:"orang", e:"Kanji: 留学生 = 留 (tinggal) + 学生 (pelajar)."},
+  {jp:"クラス", id:"kelas", cat:"tempat", e:"Dari bahasa Inggris 'class'."},
+
+  // ===== KATA WAKTU =====
+  {jp:"〜じかん", id:"jam (durasi)", cat:"waktu", e:"Kanji: 時間 = durasi waktu."},
+  {jp:"〜しゅうかん", id:"minggu (durasi)", cat:"waktu", e:"Kanji: 週間 = lamanya minggu."},
+  {jp:"〜かげつ", id:"bulan (durasi)", cat:"waktu", e:"Kanji: ヶ月 = lamanya bulan."},
+  {jp:"〜ねん", id:"tahun (durasi)", cat:"waktu", e:"Kanji: 年 = lamanya tahun."},
+  {jp:"〜ぐらい", id:"sekitar ~", cat:"keterangan", e:"Menunjukkan perkiraan jumlah atau waktu."},
+  {jp:"どのくらい", id:"berapa lama", cat:"kata tanya", e:"Menanyakan durasi."},
+  {jp:"ぜんぶで", id:"semuanya, total", cat:"keterangan", e:"Kanji: 全部で = seluruhnya, total."},
+  {jp:"みんな", id:"semua orang", cat:"keterangan", e:"Digunakan untuk orang atau kelompok."},
+  {jp:"〜だけ", id:"hanya ~", cat:"partikel", e:"Menyatakan pembatasan."},
+
+  // ===== UNGKAPAN =====
+  {jp:"いらっしゃいませ", id:"selamat datang", cat:"ungkapan", e:"Digunakan oleh penjual untuk menyambut pelanggan."},
+  {jp:"いい［お］てんきですね", id:"cuacanya bagus ya", cat:"ungkapan", e:"Ungkapan ringan saat berbincang santai."},
+  {jp:"おでかけですか", id:"mau keluar ya?", cat:"ungkapan", e:"Ungkapan ramah untuk orang yang akan pergi."},
+  {jp:"ちょっと～まで", id:"ke ~ sebentar", cat:"ungkapan", e:"Menjawab jika ditanya hendak pergi ke mana."},
+  {jp:"いっていらっしゃい", id:"hati-hati di jalan", cat:"ungkapan", e:"Dikatakan kepada orang yang akan pergi."},
+  {jp:"いってまいります", id:"saya berangkat", cat:"ungkapan", e:"Ungkapan sopan ketika hendak berangkat."},
+  {jp:"ただいま", id:"saya pulang", cat:"ungkapan", e:"Dikatakan saat tiba di rumah."},
+  {jp:"おかえりなさい", id:"selamat datang kembali", cat:"ungkapan", e:"Dikatakan kepada orang yang baru pulang."},
+  {jp:"いってきます", id:"saya pergi dulu", cat:"ungkapan", e:"Ungkapan berpamitan sebelum pergi."},
+  {jp:"おねがいします", id:"tolong", cat:"ungkapan", e:"Kanji: お願いします = permintaan sopan."},
+
+  // ===== TEMPAT =====
+  {jp:"オーストラリア", id:"Australia", cat:"negara", e:"Nama negara Australia 🇦🇺."}
+];
+
+const allWordsBab12 = [
+  // ===== KATA SIFAT (NA & I) =====
+  {jp:"かんたん[な]", id:"mudah, gampang", cat:"sifat (na)", e:"Kanji: 簡単 = sederhana, mudah."},
+  {jp:"ちかい", id:"dekat", cat:"sifat (i)", e:"Kanji: 近い = dekat, jarak pendek."},
+  {jp:"とおい", id:"jauh", cat:"sifat (i)", e:"Kanji: 遠い = jauh, jarak jauh."},
+  {jp:"はやい", id:"cepat", cat:"sifat (i)", e:"Kanji: 速い / 早い = cepat (waktu/gerak)."},
+  {jp:"おそい", id:"lambat", cat:"sifat (i)", e:"Kanji: 遅い = lambat, terlambat."},
+  {jp:"おおい [ひとが～]", id:"banyak [orang]", cat:"sifat (i)", e:"Kanji: 多い = banyak."},
+  {jp:"すくない [ひとが～]", id:"sedikit [orang]", cat:"sifat (i)", e:"Kanji: 少ない = sedikit."},
+  {jp:"あたたかい", id:"hangat, panas (untuk suhu nyaman)", cat:"sifat (i)", e:"Kanji: 暖かい / 温かい = hangat (cuaca / benda)."},
+  {jp:"すずしい", id:"sejuk", cat:"sifat (i)", e:"Kanji: 涼しい = sejuk, dingin menyenangkan."},
+  {jp:"あまい", id:"manis", cat:"sifat (i)", e:"Kanji: 甘い = manis (rasa)."},
+  {jp:"からい", id:"pedas", cat:"sifat (i)", e:"Kanji: 辛い = pedas."},
+  {jp:"おもい", id:"berat", cat:"sifat (i)", e:"Kanji: 重い = berat."},
+  {jp:"かるい", id:"ringan", cat:"sifat (i)", e:"Kanji: 軽い = ringan."},
+  {jp:"[コーヒーが] いい", id:"lebih baik [kopinya]", cat:"sifat (i)", e:"Menunjukkan preferensi. Contoh: コーヒーがいいです。= Saya lebih suka kopi."},
+
+  // ===== KATA BENDA =====
+  {jp:"きせつ", id:"musim", cat:"benda", e:"Kanji: 季節 = musim."},
+  {jp:"はる", id:"musim semi", cat:"benda", e:"Kanji: 春 = musim semi."},
+  {jp:"なつ", id:"musim panas", cat:"benda", e:"Kanji: 夏 = musim panas."},
+  {jp:"あき", id:"musim gugur", cat:"benda", e:"Kanji: 秋 = musim gugur."},
+  {jp:"ふゆ", id:"musim dingin", cat:"benda", e:"Kanji: 冬 = musim dingin."},
+  {jp:"てんき", id:"cuaca", cat:"benda", e:"Kanji: 天気 = keadaan cuaca."},
+  {jp:"あめ", id:"hujan", cat:"benda", e:"Kanji: 雨 = hujan."},
+  {jp:"ゆき", id:"salju", cat:"benda", e:"Kanji: 雪 = salju."},
+  {jp:"くもり", id:"mendung", cat:"benda", e:"Kanji: 曇り = berawan."},
+  {jp:"ホテル", id:"hotel", cat:"tempat", e:"Dari bahasa Inggris 'hotel'."},
+  {jp:"くうこう", id:"bandara", cat:"tempat", e:"Kanji: 空港 = 空 (langit) + 港 (pelabuhan)."},
+  {jp:"うみ", id:"laut", cat:"tempat", e:"Kanji: 海 = laut."},
+  {jp:"せかい", id:"dunia", cat:"benda", e:"Kanji: 世界 = dunia."},
+  {jp:"パーティー", id:"pesta", cat:"acara", e:"Dari bahasa Inggris 'party'."},
+  {jp:"[お]まつり", id:"perayaan, festival", cat:"acara", e:"Kanji: [お]祭り = festival (biasanya tradisional Jepang)."},
+
+  // ===== MAKANAN DAN KEBUDAYAAN =====
+  {jp:"すきやき", id:"sukiyaki (masakan daging dan sayur)", cat:"makanan", e:"Kanji: すき焼き = daging sapi rebus dengan sayuran."},
+  {jp:"さしみ", id:"sashimi (ikan mentah)", cat:"makanan", e:"Kanji: 刺身 = irisan ikan mentah tipis."},
+  {jp:"[お]すし", id:"sushi (nasi dengan ikan mentah)", cat:"makanan", e:"Kanji: 寿司 = nasi cuka dengan topping ikan."},
+  {jp:"てんぷら", id:"tempura (gorengan sayur/udang)", cat:"makanan", e:"Kanji: 天ぷら = makanan goreng dengan tepung terigu."},
+  {jp:"ぶたにく", id:"daging babi", cat:"makanan", e:"Kanji: 豚肉 = daging babi."},
+  {jp:"とりにく", id:"daging ayam", cat:"makanan", e:"Kanji: 鶏肉 = daging ayam."},
+  {jp:"ぎゅうにく", id:"daging sapi", cat:"makanan", e:"Kanji: 牛肉 = daging sapi."},
+  {jp:"レモン", id:"lemon", cat:"makanan", e:"Dari bahasa Inggris 'lemon'."},
+  {jp:"いけばな", id:"seni merangkai bunga", cat:"kesenian", e:"Kanji: 生け花 = seni merangkai bunga (ikebana)."},
+  {jp:"もみじ", id:"daun maple (yang berubah warna)", cat:"alam", e:"Kanji: 紅葉 = daun musim gugur yang memerah."},
+
+  // ===== UNGKAPAN DAN KATA TAMBAHAN =====
+  {jp:"どちら", id:"yang mana (dua pilihan)", cat:"kata tanya", e:"Lebih sopan dari どっち."},
+  {jp:"どちらも", id:"dua-duanya", cat:"kata ganti", e:"Menunjukkan dua hal sama-sama berlaku."},
+  {jp:"いちばん", id:"paling", cat:"keterangan", e:"Menunjukkan superlatif."},
+  {jp:"ずっと", id:"jauh lebih, terus-menerus", cat:"keterangan", e:"Menunjukkan perbandingan besar / waktu lama."},
+  {jp:"はじめて", id:"untuk pertama kali", cat:"keterangan", e:"Kanji: 初めて = pertama kali."},
+
+  // ===== UNGKAPAN HARIAN =====
+  {jp:"ただいま", id:"saya kembali (baru pulang)", cat:"ungkapan", e:"Dikatakan saat pulang ke rumah."},
+  {jp:"おかえりなさい", id:"selamat datang kembali", cat:"ungkapan", e:"Balasan untuk ただいま."},
+  {jp:"わあ、すごい ひとですね", id:"wah, banyak orang ya", cat:"ungkapan", e:"Ekspresi kagum melihat keramaian."},
+  {jp:"つかれました", id:"lelah", cat:"ungkapan", e:"Kanji: 疲れました = saya lelah."},
+
+  // ===== TEMPAT KHUSUS =====
+  {jp:"ぎおんまつり", id:"Perayaan Gion (Kyoto)", cat:"acara", e:"Kanji: 祇園祭 = festival terkenal di Kyoto."},
+  {jp:"ホンコン", id:"Hong Kong", cat:"negara", e:"Kanji: 香港 = Hong Kong."},
+  {jp:"シンガポール", id:"Singapura", cat:"negara", e:"Nama negara Singapura."},
+  {jp:"ABC ストア", id:"pasar swalayan fiksi", cat:"tempat", e:"Nama toko fiktif."},
+  {jp:"ジャパン", id:"pasar swalayan fiksi 'Japan'", cat:"tempat", e:"Nama toko fiksi di buku."}
+];
+
+const allWordsBab13 = [
+  // ===== KATA KERJA =====
+  {jp:"あそびます", id:"bermain", cat:"kata kerja", e:"Kanji: 遊びます = bermain, bersantai."},
+  {jp:"およぎます", id:"berenang", cat:"kata kerja", e:"Kanji: 泳ぎます = berenang."},
+  {jp:"むかえます", id:"menjemput", cat:"kata kerja", e:"Kanji: 迎えます = menjemput seseorang."},
+  {jp:"つかれます", id:"lelah (gunakan bentuk つかれました)", cat:"kata kerja", e:"Kanji: 疲れます = merasa lelah."},
+  {jp:"けっこんします", id:"menikah", cat:"kata kerja", e:"Kanji: 結婚します = menikah."},
+  {jp:"かいものします", id:"berbelanja", cat:"kata kerja", e:"Kanji: 買い物します = membeli sesuatu (belanja)."},
+  {jp:"しょくじします", id:"makan", cat:"kata kerja", e:"Kanji: 食事します = makan (secara formal)."},
+  {jp:"さんぽします [こうえんを～]", id:"berjalan-jalan [di taman]", cat:"kata kerja", e:"Kanji: 散歩します = berjalan-jalan."},
+
+  // ===== KATA SIFAT =====
+  {jp:"たいへん[な]", id:"berat, susah", cat:"sifat (na)", e:"Kanji: 大変 = sulit, berat."},
+  {jp:"ほしい", id:"ingin, mau", cat:"sifat (i)", e:"Kanji: 欲しい = menginginkan sesuatu."},
+  {jp:"ひろい", id:"luas", cat:"sifat (i)", e:"Kanji: 広い = luas, lebar."},
+  {jp:"せまい", id:"sempit", cat:"sifat (i)", e:"Kanji: 狭い = sempit, kecil."},
+
+  // ===== TEMPAT DAN BENDA =====
+  {jp:"プール", id:"kolam renang", cat:"tempat", e:"Dari bahasa Inggris 'pool'."},
+  {jp:"かわ", id:"sungai", cat:"tempat", e:"Kanji: 川 = sungai."},
+  {jp:"びじゅつ", id:"seni", cat:"benda", e:"Kanji: 美術 = seni rupa."},
+  {jp:"つり", id:"memancing", cat:"kegiatan", e:"Kanji: 釣り = kegiatan memancing."},
+  {jp:"スキー", id:"ski", cat:"kegiatan", e:"Dari bahasa Inggris 'ski'."},
+  {jp:"しゅうまつ", id:"akhir pekan", cat:"waktu", e:"Kanji: 週末 = akhir minggu."},
+  {jp:"[お]しょうがつ", id:"tahun baru", cat:"acara", e:"Kanji: [お]正月 = Tahun Baru Jepang."},
+  {jp:"〜ごろ", id:"sekitar ~ (waktu)", cat:"kata keterangan", e:"Menunjukkan perkiraan waktu, contoh: 7時ごろ。"},
+  {jp:"なにか", id:"sesuatu", cat:"kata ganti", e:"Kanji: 何か = sesuatu."},
+  {jp:"どこか", id:"suatu tempat", cat:"kata ganti", e:"Kanji: どこか = suatu tempat."},
+
+  // ===== UNGKAPAN DAN LATIHAN =====
+  {jp:"のどがかわきます", id:"haus (gunakan bentuk のどがかわきました)", cat:"ungkapan", e:"Kanji: 喉が渇きます = tenggorokan kering, haus."},
+  {jp:"おなかがすきます", id:"lapar (gunakan bentuk おなかがすきました)", cat:"ungkapan", e:"Kanji: お腹が空きます = merasa lapar."},
+  {jp:"そう しましょう", id:"ya, mari (setuju dengan saran)", cat:"ungkapan", e:"Digunakan saat menyetujui ide lawan bicara."},
+
+  // ===== KAIWA / DIALOG =====
+  {jp:"ごちゅうもんは？", id:"Mau pesan apa?", cat:"ungkapan (restoran)", e:"Ungkapan pelayan restoran saat melayani."},
+  {jp:"ていしょく", id:"menu paket", cat:"makanan", e:"Kanji: 定食 = makanan set menu Jepang."},
+  {jp:"ぎゅうどん", id:"gyuudon (nasi daging sapi)", cat:"makanan", e:"Kanji: 牛丼 = nasi dengan topping daging sapi."},
+  {jp:"[しょうしょう] おまちください", id:"tunggu sebentar", cat:"ungkapan sopan", e:"Bentuk sopan dari 'ちょっと待ってください'."},
+  {jp:"べつべつに", id:"sendiri-sendiri, masing-masing", cat:"ungkapan", e:"Biasa digunakan di restoran saat membayar."},
+
+  // ===== TEMPAT KHUSUS =====
+  {jp:"アキックス", id:"perusahaan fiksi", cat:"tempat", e:"Nama perusahaan fiksi di buku."},
+  {jp:"おはよう テレビ", id:"acara televisi fiksi", cat:"tempat", e:"Nama acara TV fiksi di buku."}
+];
+
+const allWordsBab14 = [
+  // ===== KATA KERJA =====
+  {jp:"つけますⅡ", id:"menyalakan, memasang, menghidupkan", cat:"kata kerja", e:"Kanji: 付けます = menyalakan lampu, AC, dsb."},
+  {jp:"けしますⅠ", id:"mematikan, memadamkan", cat:"kata kerja", e:"Kanji: 消します = mematikan listrik, lampu, dll."},
+  {jp:"あけますⅡ", id:"membuka", cat:"kata kerja", e:"Kanji: 開けます = membuka pintu, jendela, dll."},
+  {jp:"しめますⅡ", id:"menutup", cat:"kata kerja", e:"Kanji: 閉めます = menutup sesuatu."},
+  {jp:"いそぎますⅠ", id:"buru-buru", cat:"kata kerja", e:"Kanji: 急ぎます = bergegas."},
+  {jp:"まちますⅠ", id:"menunggu", cat:"kata kerja", e:"Kanji: 待ちます = menunggu seseorang/sesuatu."},
+  {jp:"もちますⅠ", id:"membawa", cat:"kata kerja", e:"Kanji: 持ちます = membawa, memegang."},
+  {jp:"とりますⅠ", id:"mengambil", cat:"kata kerja", e:"Kanji: 取ります = mengambil barang."},
+  {jp:"てつだいますⅠ", id:"membantu", cat:"kata kerja", e:"Kanji: 手伝います = membantu seseorang."},
+  {jp:"よびますⅠ", id:"memanggil", cat:"kata kerja", e:"Kanji: 呼びます = memanggil orang/taksi."},
+  {jp:"はなしますⅠ", id:"berbicara", cat:"kata kerja", e:"Kanji: 話します = berbicara, bercakap-cakap."},
+  {jp:"つかいますⅠ", id:"memakai, menggunakan", cat:"kata kerja", e:"Kanji: 使います = menggunakan sesuatu."},
+  {jp:"とめますⅡ", id:"menghentikan, memarkir", cat:"kata kerja", e:"Kanji: 止めます = menghentikan kendaraan atau mesin."},
+  {jp:"みせますⅡ", id:"memperlihatkan", cat:"kata kerja", e:"Kanji: 見せます = menunjukkan sesuatu."},
+  {jp:"おしえますⅡ [じゅうしょを～]", id:"memberitahukan [alamat]", cat:"kata kerja", e:"Kanji: 教えます = mengajar atau memberi tahu."},
+  {jp:"すわりますⅠ", id:"duduk", cat:"kata kerja", e:"Kanji: 座ります = duduk."},
+  {jp:"たちますⅠ", id:"berdiri", cat:"kata kerja", e:"Kanji: 立ちます = berdiri."},
+  {jp:"はいりますⅠ [きっさてんに～]", id:"masuk [ke kafe]", cat:"kata kerja", e:"Kanji: 入ります = masuk (ke tempat)."},
+  {jp:"でますⅡ [きっさてんを～]", id:"keluar [dari kafe]", cat:"kata kerja", e:"Kanji: 出ます = keluar (dari tempat)."},
+  {jp:"ふりますⅠ [あめが～]", id:"turun [hujan]", cat:"kata kerja", e:"Kanji: 降ります = turun hujan atau salju."},
+  {jp:"コピーしますⅢ", id:"memfotokopi", cat:"kata kerja", e:"Dari bahasa Inggris 'copy'."},
+
+  // ===== KATA BENDA =====
+  {jp:"でんき", id:"listrik, lampu", cat:"benda", e:"Kanji: 電気 = listrik."},
+  {jp:"エアコン", id:"AC", cat:"benda", e:"Dari bahasa Inggris 'air conditioner'."},
+  {jp:"パスポート", id:"paspor", cat:"benda", e:"Dari bahasa Inggris 'passport'."},
+  {jp:"なまえ", id:"nama", cat:"benda", e:"Kanji: 名前 = nama."},
+  {jp:"じゅうしょ", id:"alamat", cat:"benda", e:"Kanji: 住所 = alamat."},
+  {jp:"ちず", id:"peta", cat:"benda", e:"Kanji: 地図 = peta."},
+  {jp:"しお", id:"garam", cat:"benda", e:"Kanji: 塩 = garam."},
+  {jp:"さとう", id:"gula", cat:"benda", e:"Kanji: 砂糖 = gula."},
+  {jp:"もんだい", id:"masalah, soal", cat:"benda", e:"Kanji: 問題 = soal, masalah."},
+  {jp:"こたえ", id:"jawaban", cat:"benda", e:"Kanji: 答え = jawaban."},
+  {jp:"よみかた", id:"cara membaca", cat:"benda", e:"Kanji: 読み方 = cara baca (～方 menunjukkan cara)."},
+  {jp:"～かた", id:"cara ~", cat:"pola", e:"～方 = cara melakukan sesuatu."},
+
+  // ===== KATA KETERANGAN =====
+  {jp:"まっすぐ", id:"lurus", cat:"keterangan", e:"Menunjukkan arah jalan lurus."},
+  {jp:"ゆっくり", id:"pelan-pelan, istirahat dengan baik", cat:"keterangan", e:"Menunjukkan tempo lambat."},
+  {jp:"すぐ", id:"segera, langsung", cat:"keterangan", e:"Segera melakukan sesuatu."},
+  {jp:"また", id:"lagi", cat:"keterangan", e:"Menunjukkan pengulangan."},
+  {jp:"あとで", id:"nanti", cat:"keterangan", e:"Setelah itu / nanti."},
+  {jp:"もうすこし", id:"sedikit lagi", cat:"keterangan", e:"Kanji: もう少し = sedikit lagi."},
+  {jp:"もう～", id:"~ lagi", cat:"pola", e:"Digunakan untuk menunjukkan tambahan."},
+
+  // ===== UNGKAPAN =====
+  {jp:"さあ", id:"mari (ajakan)", cat:"ungkapan", e:"Digunakan untuk memberi semangat atau ajakan."},
+  {jp:"あれ？", id:"ah? (heran)", cat:"ungkapan", e:"Ekspresi heran atau kaget."},
+
+  // ===== KAIWA =====
+  {jp:"しんごうを みぎへ まがって ください", id:"tolong belok ke kanan di lampu lalu lintas", cat:"kalimat kaiwa", e:"Contoh perintah sopan menggunakan ～てください."},
+  {jp:"これで おねがいします", id:"minta dengan ini (saat membayar)", cat:"kalimat kaiwa", e:"Ungkapan ketika menyerahkan uang/pembayaran."},
+  {jp:"おつり", id:"uang kembalian", cat:"benda", e:"Kanji: お釣り = uang kembalian."},
+
+  // ===== TEMPAT KHUSUS =====
+  {jp:"みどりちょう", id:"kota fiksi Midori", cat:"tempat", e:"Kanji: 緑町 = kota fiktif dalam buku."}
+];
+
+const allWordsBab15 = [
+  // ===== KATA KERJA =====
+  {jp:"たちますⅠ", id:"berdiri", cat:"kata kerja", e:"Kanji: 立ちます = berdiri."},
+  {jp:"すわりますⅠ", id:"duduk", cat:"kata kerja", e:"Kanji: 座ります = duduk."},
+  {jp:"つかいますⅠ", id:"menggunakan", cat:"kata kerja", e:"Kanji: 使います = menggunakan sesuatu."},
+  {jp:"おきますⅠ", id:"meletakkan", cat:"kata kerja", e:"Kanji: 置きます = menaruh, meletakkan."},
+  {jp:"つくりますⅠ", id:"membuat, memproduksi", cat:"kata kerja", e:"Kanji: 作ります / 造ります = membuat, memproduksi."},
+  {jp:"うりますⅠ", id:"menjual", cat:"kata kerja", e:"Kanji: 売ります = menjual barang."},
+  {jp:"しりますⅠ", id:"mengetahui", cat:"kata kerja", e:"Kanji: 知ります = tahu, mengenal."},
+  {jp:"すみますⅠ", id:"tinggal, menetap", cat:"kata kerja", e:"Kanji: 住みます = tinggal di suatu tempat."},
+  {jp:"けんきゅうしますⅢ", id:"meneliti", cat:"kata kerja", e:"Kanji: 研究します = melakukan penelitian."},
+
+  // ===== KATA BENDA =====
+  {jp:"しって います", id:"sudah tahu", cat:"ungkapan", e:"Bentuk progresif 知っています = sudah mengetahui."},
+  {jp:"すんで います [おおさかに～]", id:"tinggal [di Osaka]", cat:"ungkapan", e:"Bentuk progresif 住んでいます = sedang menetap di suatu tempat."},
+  {jp:"しりょう", id:"data, bahan", cat:"benda", e:"Kanji: 資料 = bahan referensi, dokumen."},
+  {jp:"カタログ", id:"katalog", cat:"benda", e:"Dari bahasa Inggris 'catalogue'."},
+  {jp:"じこくひょう", id:"jadwal waktu (kereta, bus)", cat:"benda", e:"Kanji: 時刻表 = tabel jadwal waktu."},
+  {jp:"ふく", id:"baju", cat:"benda", e:"Kanji: 服 = pakaian."},
+  {jp:"せいひん", id:"produk, barang hasil produksi", cat:"benda", e:"Kanji: 製品 = produk pabrik."},
+  {jp:"ソフト", id:"software", cat:"benda", e:"Dari bahasa Inggris 'software'."},
+  {jp:"せんもん", id:"keahlian, jurusan", cat:"benda", e:"Kanji: 専門 = bidang spesialisasi."},
+  {jp:"はいしゃ", id:"dokter gigi", cat:"orang", e:"Kanji: 歯医者 = dokter gigi."},
+  {jp:"とこや", id:"tukang cukur", cat:"tempat", e:"Kanji: 床屋 = tukang pangkas rambut."},
+  {jp:"プレイガイド", id:"loket tiket (hiburan, teater)", cat:"tempat", e:"Dari bahasa Inggris 'play guide'."},
+  {jp:"どくしん", id:"lajang", cat:"status", e:"Kanji: 独身 = belum menikah."},
+
+  // ===== KATA TAMBAHAN =====
+  {jp:"とくに", id:"terutama, secara khusus", cat:"keterangan", e:"Kanji: 特に = terutama."},
+  {jp:"ごかぞく", id:"keluarga (orang lain)", cat:"sapaan sopan", e:"Kanji: ご家族 = keluarga orang lain (bentuk sopan)."},
+  
+  // ===== KAIWA / UNGKAPAN =====
+  {jp:"いらっしゃいます", id:"ada, pergi, datang (bentuk sopan います／行きます／来ます)", cat:"ungkapan", e:"Bentuk sopan untuk orang yang dihormati."},
+
+  // ===== NAMA TEMPAT & TOKOH =====
+  {jp:"にっぽんばし", id:"Nipponbashi (nama tempat di Osaka)", cat:"tempat", e:"Kanji: 日本橋 = kawasan belanja elektronik di Osaka."},
+  {jp:"おおさかに すんで います", id:"tinggal di Osaka", cat:"ungkapan", e:"Contoh kalimat penggunaan 住んでいます."}
+];
+
+const allWordsBab16 = [
+  {jp:"のります", id:"naik [kereta rel listrik]", cat:"kata kerja"},
+  {jp:"おります", id:"turun [kereta rel listrik]", cat:"kata kerja"},
+  {jp:"のりかえます", id:"ganti, pindah", cat:"kata kerja"},
+  {jp:"あびます", id:"mandi", cat:"kata kerja"},
+  {jp:"いれます", id:"memasukkan", cat:"kata kerja"},
+  {jp:"だします", id:"mengeluarkan, menyerahkan, mengirim", cat:"kata kerja"},
+  {jp:"おろします", id:"mengeluarkan, mengambil [uang]", cat:"kata kerja"},
+  {jp:"はいります", id:"masuk [universitas]", cat:"kata kerja"},
+  {jp:"でます", id:"tamat [dari universitas]", cat:"kata kerja"},
+  {jp:"おします", id:"menekan", cat:"kata kerja"},
+  {jp:"のみます", id:"minum [minuman keras]", cat:"kata kerja"},
+  {jp:"はじめます", id:"mulai", cat:"kata kerja"},
+  {jp:"けんがくします", id:"mengunjungi", cat:"kata kerja"},
+  {jp:"でんわします", id:"menelpon", cat:"kata kerja"},
+  {jp:"わかい", id:"muda", cat:"sifat"},
+  {jp:"ながい", id:"panjang", cat:"sifat"},
+  {jp:"みじかい", id:"pendek", cat:"sifat"},
+  {jp:"あかるい", id:"terang", cat:"sifat"},
+  {jp:"くらい", id:"gelap", cat:"sifat"},
+  {jp:"からだ", id:"badan", cat:"benda"},
+  {jp:"あたま", id:"kepala", cat:"benda"},
+  {jp:"かみ", id:"rambut", cat:"benda"},
+  {jp:"かお", id:"muka", cat:"benda"},
+  {jp:"みみ", id:"telinga", cat:"benda"},
+  {jp:"はな", id:"hidung", cat:"benda"},
+  {jp:"くち", id:"mulut", cat:"benda"},
+  {jp:"は", id:"gigi", cat:"benda"},
+  {jp:"おなか", id:"perut", cat:"benda"},
+  {jp:"あし", id:"kaki", cat:"benda"},
+  {jp:"せ", id:"punggung", cat:"benda"},
+  {jp:"サービス", id:"pelayanan", cat:"kata benda"},
+  {jp:"ジョギング", id:"joging, lari pelan-pelan", cat:"kata benda"},
+  {jp:"シャワー", id:"shower", cat:"kata benda"},
+  {jp:"みどり", id:"hijau, tumbuhan hijau", cat:"kata benda"},
+  {jp:"[お]てら", id:"wihara", cat:"tempat"},
+  {jp:"じんじゃ", id:"kuil Shinto", cat:"tempat"},
+  {jp:"ばん", id:"nomor", cat:"kata benda"},
+  {jp:"どの〜", id:"yang mana (lebih dari tiga)", cat:"kata tanya"},
+  {jp:"どれ", id:"yang mana", cat:"kata tanya"},
+  {jp:"すごいですね", id:"hebat", cat:"ungkapan"},
+  {jp:"いいえ、まだまだです", id:"tidak, belum memuaskan", cat:"ungkapan"},
+  {jp:"おひきだしですか", id:"mau menarik uang?", cat:"ungkapan"},
+  {jp:"まず", id:"pertama-tama", cat:"kata keterangan"},
+  {jp:"つぎに", id:"kemudian", cat:"kata keterangan"},
+  {jp:"キャッシュカード", id:"kartu ATM", cat:"kata benda"},
+  {jp:"あんしょうばんごう", id:"PIN", cat:"kata benda"},
+  {jp:"きんがく", id:"jumlah uang", cat:"kata benda"},
+  {jp:"かくにん", id:"cek, memastikan", cat:"kata kerja"},
+  {jp:"ボタン", id:"tombol", cat:"kata benda"},
+  {jp:"JR", id:"perusahaan kereta rel listrik Jepang", cat:"nama"},
+  {jp:"まつり", id:"pesta salju", cat:"kata benda"},
+  {jp:"バンドン", id:"Bandung", cat:"nama tempat"},
+  {jp:"フランケン", id:"Franken (Jerman)", cat:"nama tempat"},
+  {jp:"ベラクルス", id:"Veracruz (Meksiko)", cat:"nama tempat"},
+  {jp:"うめだ", id:"Umeda (Osaka)", cat:"nama tempat"},
+  {jp:"だいがくまえ", id:"halte fiksi", cat:"nama tempat"}
+];
+
+const allWordsBab17 = [
+  {jp:"おぼえます", id:"mengingat, menghafal", cat:"kata kerja"},
+  {jp:"わすれます", id:"lupa", cat:"kata kerja"},
+  {jp:"なくします", id:"kehilangan", cat:"kata kerja"},
+  {jp:"はらいます", id:"membayar", cat:"kata kerja"},
+  {jp:"かえします", id:"mengembalikan", cat:"kata kerja"},
+  {jp:"でかけます", id:"pergi, keluar, berangkat", cat:"kata kerja"},
+  {jp:"ぬぎます", id:"buka (baju, sepatu, dll.)", cat:"kata kerja"},
+  {jp:"もっていきます", id:"membawa pergi", cat:"kata kerja"},
+  {jp:"もってきます", id:"membawa datang", cat:"kata kerja"},
+  {jp:"しんぱいします", id:"mengkhawatirkan", cat:"kata kerja"},
+  {jp:"ざんぎょうします", id:"lembur", cat:"kata kerja"},
+  {jp:"しゅっちょうします", id:"dinas", cat:"kata kerja"},
+  {jp:"のみます", id:"minum [obat]", cat:"kata kerja"},
+  {jp:"はいります", id:"masuk, mandi [ofuro]", cat:"kata kerja"},
+  {jp:"たいせつ[な]", id:"penting, berharga", cat:"sifat"},
+  {jp:"だいじょうぶ[な]", id:"tidak apa-apa", cat:"sifat"},
+  {jp:"あぶない", id:"berbahaya", cat:"sifat"},
+  {jp:"きんえん", id:"dilarang merokok", cat:"ungkapan"},
+  {jp:"[けんこう]ほけんしょう", id:"kartu asuransi kesehatan", cat:"dokumen"},
+  {jp:"ねつ", id:"demam", cat:"kata benda"},
+  {jp:"びょうき", id:"penyakit", cat:"kata benda"},
+  {jp:"くすり", id:"obat", cat:"kata benda"},
+  {jp:"[お]ふろ", id:"mandi, kamar mandi", cat:"kata benda"},
+  {jp:"うわぎ", id:"baju, jaket", cat:"kata benda"},
+  {jp:"したぎ", id:"pakaian dalam", cat:"kata benda"},
+  {jp:"２、３にち", id:"dua atau tiga hari", cat:"ungkapan waktu"},
+  {jp:"〜までに", id:"sampai dengan (batas waktu)", cat:"kata sambung"},
+  {jp:"ですから", id:"oleh karena itu", cat:"kata sambung"},
+  {jp:"どうしましたか", id:"ada apa? / kenapa?", cat:"ungkapan"},
+  {jp:"のど", id:"tenggorokan", cat:"kata benda"},
+  {jp:"[〜が] いたいです", id:"sakit [bagian tubuh]", cat:"ungkapan"},
+  {jp:"かぜ", id:"masuk angin", cat:"kata benda"},
+  {jp:"それから", id:"kemudian", cat:"kata sambung"},
+  {jp:"おだいじに", id:"semoga lekas sembuh", cat:"ungkapan"}
+];
+
+const allWordsBab18 = [
+  {jp:"できます", id:"dapat, bisa, mampu", cat:"kata kerja"},
+  {jp:"あらいます", id:"mencuci", cat:"kata kerja"},
+  {jp:"ひきます", id:"bermain (alat musik senar/piano)", cat:"kata kerja"},
+  {jp:"うたいます", id:"bernyanyi", cat:"kata kerja"},
+  {jp:"あつめます", id:"mengumpulkan", cat:"kata kerja"},
+  {jp:"すてます", id:"membuang", cat:"kata kerja"},
+  {jp:"かえます", id:"mengganti, menukar", cat:"kata kerja"},
+  {jp:"うんてんします", id:"menyetir, mengendarai", cat:"kata kerja"},
+  {jp:"よやくします", id:"memesan", cat:"kata kerja"},
+  {jp:"ピアノ", id:"piano", cat:"kata benda"},
+  {jp:"メートル", id:"meter", cat:"kata benda"},
+  {jp:"げんきん", id:"uang tunai", cat:"kata benda"},
+  {jp:"しゅみ", id:"hobi, kegemaran", cat:"kata benda"},
+  {jp:"にっき", id:"catatan harian", cat:"kata benda"},
+  {jp:"おいのり", id:"doa", cat:"kata benda"},
+  {jp:"かちょう", id:"kepala seksi", cat:"jabatan"},
+  {jp:"ぶちょう", id:"kepala bagian", cat:"jabatan"},
+  {jp:"しゃちょう", id:"direktur utama", cat:"jabatan"},
+  {jp:"どうぶつ", id:"hewan", cat:"kata benda"},
+  {jp:"うま", id:"kuda", cat:"kata benda"},
+  {jp:"インターネット", id:"internet", cat:"kata benda"},
+  {jp:"とくに", id:"terutama, khususnya", cat:"kata keterangan"},
+  {jp:"へえ", id:"betul ya?, benar ya?", cat:"ungkapan"},
+  {jp:"それは おもしろいですね", id:"itu menarik ya", cat:"ungkapan"},
+  {jp:"なかなか", id:"jarang, tidak mudah", cat:"kata keterangan"},
+  {jp:"ほんとうですか", id:"benarkah?", cat:"ungkapan"},
+  {jp:"ぜひ", id:"benar-benar, mesti", cat:"kata keterangan"},
+  {jp:"ふるさと", id:"kampung halaman", cat:"kata benda"},
+  {jp:"ビートルズ", id:"The Beatles", cat:"nama"},
+  {jp:"あきはばら", id:"Akihabara", cat:"nama tempat"}
+];
+
+const allWordsBab19 = [
+  {jp:"のぼります", id:"naik", cat:"kata kerja"},
+  {jp:"とまります", id:"menginap [di hotel]", cat:"kata kerja"},
+  {jp:"そうじします", id:"membersihkan", cat:"kata kerja"},
+  {jp:"せんたくします", id:"mencuci pakaian", cat:"kata kerja"},
+  {jp:"なります", id:"menjadi", cat:"kata kerja"},
+  {jp:"ねむい", id:"mengantuk", cat:"sifat"},
+  {jp:"つよい", id:"kuat", cat:"sifat"},
+  {jp:"よわい", id:"lemah", cat:"sifat"},
+  {jp:"れんしゅう", id:"latihan", cat:"kata benda"},
+  {jp:"ゴルフ", id:"golf", cat:"kata benda"},
+  {jp:"すもう", id:"sumo", cat:"kata benda"},
+  {jp:"おちゃ", id:"upacara minum teh", cat:"kata benda"},
+  {jp:"ひ", id:"hari", cat:"kata benda"},
+  {jp:"ちょうし", id:"kondisi", cat:"kata benda"},
+  {jp:"いちど", id:"sekali", cat:"kata keterangan"},
+  {jp:"いちども", id:"sekali pun (negatif)", cat:"kata keterangan"},
+  {jp:"だんだん", id:"berangsur-angsur", cat:"kata keterangan"},
+  {jp:"もうすぐ", id:"tidak lama lagi", cat:"kata keterangan"},
+  {jp:"おかげさまで", id:"atas berkat (ungkapan terima kasih)", cat:"ungkapan"},
+  {jp:"でも", id:"tetapi", cat:"kata sambung"},
+  {jp:"かんぱい", id:"toast", cat:"ungkapan"},
+  {jp:"ダイエット", id:"diet", cat:"kata benda"},
+  {jp:"むり[な]", id:"paksa, berlebihan", cat:"sifat"},
+  {jp:"からだにいい", id:"baik untuk tubuh", cat:"ungkapan"},
+  {jp:"とうきょうスカイツリー", id:"Tokyo Sky Tree", cat:"nama tempat"},
+  {jp:"かつしかほくさい", id:"Katsushika Hokusai (pelukis)", cat:"nama orang"}
+];
+
+const allWordsBab20 = [
+  {jp:"いります", id:"memerlukan [VISA]", cat:"kata kerja"},
+  {jp:"しらべます", id:"memeriksa, meneliti, mengecek", cat:"kata kerja"},
+  {jp:"しゅうりします", id:"memperbaiki", cat:"kata kerja"},
+  {jp:"ぼく", id:"aku (pria)", cat:"pronomina"},
+  {jp:"きみ", id:"kamu (bentuk informal)", cat:"pronomina"},
+  {jp:"〜くん", id:"sapaan untuk laki-laki", cat:"akhiran"},
+  {jp:"うん", id:"ya (informal)", cat:"ungkapan"},
+  {jp:"ううん", id:"tidak (informal)", cat:"ungkapan"},
+  {jp:"ことば", id:"kata, bahasa", cat:"kata benda"},
+  {jp:"きもの", id:"kimono", cat:"kata benda"},
+  {jp:"ビザ", id:"VISA", cat:"kata benda"},
+  {jp:"はじめ", id:"awal", cat:"kata benda"},
+  {jp:"おわり", id:"akhir", cat:"kata benda"},
+  {jp:"こっち", id:"sini (informal)", cat:"kata penunjuk"},
+  {jp:"そっち", id:"situ (informal)", cat:"kata penunjuk"},
+  {jp:"あっち", id:"sana (informal)", cat:"kata penunjuk"},
+  {jp:"どっち", id:"mana (informal)", cat:"kata tanya"},
+  {jp:"みんなで", id:"kita semua, bersama-sama", cat:"ungkapan"},
+  {jp:"〜けど", id:"tetapi", cat:"kata sambung"},
+  {jp:"おなかがいっぱいです", id:"sudah kenyang", cat:"ungkapan"},
+  {jp:"よかったら", id:"kalau mau", cat:"ungkapan"},
+  {jp:"いろいろ", id:"macam-macam", cat:"kata sifat"},
+];
+
+const allWordsBab21 = [
+  {jp:"おもいます", id:"mengira, berpikir", cat:"kata kerja"},
+  {jp:"いいます", id:"mengatakan, berkata", cat:"kata kerja"},
+  {jp:"かちます", id:"menang", cat:"kata kerja"},
+  {jp:"まけます", id:"kalah", cat:"kata kerja"},
+  {jp:"あります", id:"ada, diadakan [pesta perayaan]", cat:"kata kerja"},
+  {jp:"やくにたちます", id:"berguna, bermanfaat", cat:"kata kerja"},
+  {jp:"うごきます", id:"bergerak", cat:"kata kerja"},
+  {jp:"やめます", id:"berhenti [kerja]", cat:"kata kerja"},
+  {jp:"きをつけます", id:"berhati-hati, waspada", cat:"kata kerja"},
+  {jp:"りゅうがくします", id:"studi di luar negeri", cat:"kata kerja"},
+  {jp:"むだ[な]", id:"sia-sia, tidak berguna", cat:"sifat"},
+  {jp:"ふべん[な]", id:"tidak praktis", cat:"sifat"},
+  {jp:"すごい", id:"hebat, luar biasa", cat:"sifat"},
+  {jp:"ほんとう", id:"benar, sungguh", cat:"kata benda"},
+  {jp:"うそ", id:"bohong", cat:"kata benda"},
+  {jp:"じどうしゃ", id:"mobil", cat:"kata benda"},
+  {jp:"こうつう", id:"lalu lintas", cat:"kata benda"},
+  {jp:"ぶっか", id:"harga barang", cat:"kata benda"},
+  {jp:"ほうそう", id:"siaran, pengumuman", cat:"kata benda"},
+  {jp:"ニュース", id:"berita", cat:"kata benda"},
+  {jp:"アニメ", id:"animasi", cat:"kata benda"},
+  {jp:"マンガ", id:"komik", cat:"kata benda"},
+  {jp:"デザイン", id:"desain, model", cat:"kata benda"},
+  {jp:"ゆめ", id:"mimpi", cat:"kata benda"},
+  {jp:"てんさい", id:"genius", cat:"kata benda"},
+  {jp:"しあい", id:"pertandingan, lomba", cat:"kata benda"},
+  {jp:"いけん", id:"pendapat", cat:"kata benda"},
+  {jp:"はなし", id:"cerita, pembicaraan", cat:"kata benda"},
+  {jp:"ちきゅう", id:"bumi", cat:"kata benda"},
+  {jp:"つき", id:"bulan", cat:"kata benda"},
+  {jp:"さいきん", id:"akhir-akhir ini", cat:"kata keterangan"},
+  {jp:"たぶん", id:"mungkin", cat:"kata keterangan"},
+  {jp:"きっと", id:"pasti", cat:"kata keterangan"},
+  {jp:"ほんとうに", id:"betul-betul", cat:"kata keterangan"},
+  {jp:"そんなに", id:"tidak begitu (negatif)", cat:"kata keterangan"},
+  {jp:"〜について", id:"tentang, mengenai", cat:"partikel"},
+  {jp:"ひさしぶりですね", id:"lama tidak bertemu ya", cat:"ungkapan"},
+  {jp:"でも、のみませんか", id:"bagaimana kalau minum", cat:"ungkapan"},
+  {jp:"もちろん", id:"tentu saja", cat:"ungkapan"},
+  {jp:"もうかえらないと", id:"saya harus pulang", cat:"ungkapan"},
+  {jp:"アイシュタイン", id:"Albert Einstein", cat:"nama orang"},
+  {jp:"ガガーリン", id:"Yuri Gagarin", cat:"nama orang"},
+  {jp:"ガリレオ", id:"Galileo Galilei", cat:"nama orang"},
+  {jp:"キングぼくし", id:"Martin Luther King Jr.", cat:"nama orang"},
+  {jp:"フランクリン", id:"Benjamin Franklin", cat:"nama orang"},
+  {jp:"かぐやひめ", id:"Putri Kaguya", cat:"tokoh dongeng"},
+  {jp:"てんじんまつり", id:"Perayaan Tenjin (Osaka)", cat:"nama acara"},
+  {jp:"よしのやま", id:"Gunung Yoshino (Nara)", cat:"nama tempat"},
+  {jp:"カンガルー", id:"kanguru", cat:"hewan"},
+  {jp:"キャプテン・クック", id:"Captain James Cook", cat:"nama orang"},
+  {jp:"ヨーネン", id:"perusahaan fiksi", cat:"nama tempat"}
+];
+
+const allWordsBab22 = [
+  {jp:"きます", id:"memakai (kemeja)", cat:"kata kerja"},
+  {jp:"はきます", id:"memakai (sepatu, celana)", cat:"kata kerja"},
+  {jp:"かぶります", id:"memakai (topi)", cat:"kata kerja"},
+  {jp:"かけます", id:"memakai (kacamata)", cat:"kata kerja"},
+  {jp:"します", id:"memakai (dasi)", cat:"kata kerja"},
+  {jp:"うまれます", id:"lahir", cat:"kata kerja"},
+  {jp:"わたしたち", id:"kami, kita", cat:"pronomina"},
+  {jp:"コート", id:"mantel", cat:"kata benda"},
+  {jp:"セーター", id:"sweater", cat:"kata benda"},
+  {jp:"スーツ", id:"pakaian setelan", cat:"kata benda"},
+  {jp:"ぼうし", id:"topi", cat:"kata benda"},
+  {jp:"めがね", id:"kacamata", cat:"kata benda"},
+  {jp:"ケーキ", id:"kue", cat:"kata benda"},
+  {jp:"おべんとう", id:"bekal", cat:"kata benda"},
+  {jp:"ロボット", id:"robot", cat:"kata benda"},
+  {jp:"ユーモア", id:"humor", cat:"kata benda"},
+  {jp:"つごう", id:"kondisi", cat:"kata benda"},
+  {jp:"よく", id:"sering kali", cat:"kata keterangan"},
+  {jp:"えーと", id:"itu...", cat:"ungkapan"},
+  {jp:"おめでとうございます", id:"selamat (ulang tahun, pernikahan, dll.)", cat:"ungkapan"},
+  {jp:"おさがしですか", id:"mencari apa?", cat:"ungkapan"},
+  {jp:"では", id:"kalau begitu", cat:"ungkapan"},
+  {jp:"こちら", id:"ini (sopan dari これ)", cat:"kata tunjuk"},
+  {jp:"やちん", id:"biaya sewa rumah", cat:"kata benda"},
+  {jp:"ダイニングキッチン", id:"ruang makan dengan dapur", cat:"kata benda"},
+  {jp:"わしつ", id:"kamar ala Jepang", cat:"kata benda"},
+  {jp:"おしいれ", id:"lemari dinding ala Jepang", cat:"kata benda"},
+  {jp:"ふとん", id:"selimut dan kasur Jepang", cat:"kata benda"},
+  {jp:"パリ", id:"Paris", cat:"nama tempat"},
+  {jp:"ばんりのちょうじょう", id:"Tembok Besar Cina", cat:"nama tempat"},
+  {jp:"みんなのアンケート", id:"angket fiksi", cat:"nama fiksi"}
+];
+
+const allWordsBab23 = [
+  {jp:"ききます", id:"bertanya [kepada guru]", cat:"kata kerja"},
+  {jp:"まわします", id:"memutar", cat:"kata kerja"},
+  {jp:"ひきます", id:"menarik", cat:"kata kerja"},
+  {jp:"かえます", id:"mengubah", cat:"kata kerja"},
+  {jp:"さわります", id:"menyentuh [pintu]", cat:"kata kerja"},
+  {jp:"でます", id:"keluar [uang kembalian]", cat:"kata kerja"},
+  {jp:"あるきます", id:"berjalan kaki", cat:"kata kerja"},
+  {jp:"わたります", id:"menyeberang [jembatan]", cat:"kata kerja"},
+  {jp:"まがります", id:"belok [ke kanan]", cat:"kata kerja"},
+  {jp:"さびしい", id:"sepi", cat:"sifat"},
+  {jp:"[お]ゆ", id:"air panas", cat:"kata benda"},
+  {jp:"こえ", id:"suara", cat:"kata benda"},
+  {jp:"サイズ", id:"ukuran", cat:"kata benda"},
+  {jp:"こしょう", id:"kerusakan", cat:"kata benda"},
+  {jp:"みち", id:"jalan", cat:"kata benda"},
+  {jp:"こうさてん", id:"perempatan", cat:"kata benda"},
+  {jp:"しんごう", id:"lampu lalu lintas", cat:"kata benda"},
+  {jp:"かど", id:"sudut", cat:"kata benda"},
+  {jp:"はし", id:"jembatan", cat:"kata benda"},
+  {jp:"ちゅうしゃじょう", id:"tempat parkir", cat:"kata benda"},
+  {jp:"たてもの", id:"gedung", cat:"kata benda"},
+  {jp:"なんかいも", id:"berkali-kali", cat:"kata keterangan"},
+  {jp:"ーめ", id:"yang ke-", cat:"partikel"},
+  {jp:"しょうとくたいし", id:"Pangeran Shotoku", cat:"nama orang"},
+  {jp:"ほうりゅうじ", id:"nama wihara di Nara", cat:"nama tempat"},
+  {jp:"げんきちゃ", id:"teh fiksi", cat:"nama fiksi"},
+  {jp:"ほんだえき", id:"stasiun fiksi", cat:"nama fiksi"},
+  {jp:"としょかんまえ", id:"halte bus fiksi", cat:"nama fiksi"}
+];
+
+const allWordsBab24 = [
+  {jp:"くれます", id:"memberikan", cat:"kata kerja"},
+  {jp:"なおします", id:"memperbaiki, mengoreksi", cat:"kata kerja"},
+  {jp:"つれていきます", id:"membawa, mengajak pergi", cat:"kata kerja"},
+  {jp:"つれてきます", id:"membawa datang, mengajak datang", cat:"kata kerja"},
+  {jp:"おくります", id:"mengantar [orang]", cat:"kata kerja"},
+  {jp:"しょうかいします", id:"memperkenalkan", cat:"kata kerja"},
+  {jp:"あんないします", id:"mengantarkan, menunjukkan jalan", cat:"kata kerja"},
+  {jp:"せつめいします", id:"menjelaskan", cat:"kata kerja"},
+  {jp:"おじいさん", id:"kakek", cat:"keluarga"},
+  {jp:"おばあさん", id:"nenek", cat:"keluarga"},
+  {jp:"じゅんび", id:"persiapan", cat:"kata benda"},
+  {jp:"ひっこし", id:"pindah rumah", cat:"kata kerja"},
+  {jp:"おかし", id:"kue", cat:"kata benda"},
+  {jp:"ホームステイ", id:"homestay", cat:"kata benda"},
+  {jp:"ぜんぶ", id:"semuanya", cat:"kata benda"},
+  {jp:"じぶんで", id:"dengan sendiri", cat:"ungkapan"},
+  {jp:"ほかに", id:"selain, yang lain", cat:"ungkapan"},
+  {jp:"ははのひ", id:"hari ibu", cat:"nama hari"}
+];
+
+const allWordsBab25 = [
+  {jp:"かんがえます", id:"berpikir, memikirkan", cat:"kata kerja"},
+  {jp:"つきます", id:"tiba, sampai", cat:"kata kerja"},
+  {jp:"とります", id:"berumur, lanjut usia", cat:"kata kerja"},
+  {jp:"たります", id:"cukup", cat:"kata kerja"},
+  {jp:"いなか", id:"desa, kampung halaman", cat:"kata benda"},
+  {jp:"チャンス", id:"kesempatan", cat:"kata benda"},
+  {jp:"おく", id:"ratus juta", cat:"angka"},
+  {jp:"もし〜たら", id:"kalau", cat:"ungkapan"},
+  {jp:"いみ", id:"arti, makna", cat:"kata benda"},
+  {jp:"もしもし", id:"halo (saat menelpon)", cat:"ungkapan"},
+  {jp:"てんきん", id:"pindah jabatan atau cabang", cat:"kata kerja"},
+  {jp:"こと", id:"hal", cat:"kata benda"},
+  {jp:"ひま", id:"waktu luang", cat:"kata benda"},
+  {jp:"いろいろおせわになりました", id:"terima kasih atas bantuannya", cat:"ungkapan"},
+  {jp:"がんばります", id:"berusaha, bekerja keras", cat:"kata kerja"},
+  {jp:"どうぞおげんきで", id:"semoga sehat selalu", cat:"ungkapan"},
+  {jp:"ベトナム", id:"Vietnam", cat:"nama negara"}
+];
+
+// -------------------------------------------------------
+
+/* Ambil bank sesuai bab */
+function getBabWords(bab){
+  switch(bab){
+  case 1: return allWordsBab1;
+  case 2: return allWordsBab2;
+  case 3: return allWordsBab3;
+  case 4: return allWordsBab4;
+  case 5: return allWordsBab5;
+  case 6: return allWordsBab6;
+  case 7: return allWordsBab7;
+  case 8: return allWordsBab8;
+  case 9: return allWordsBab9;
+  case 10: return allWordsBab10;
+  case 11: return allWordsBab11;
+  case 12: return allWordsBab12;
+  case 13: return allWordsBab13;
+  case 14: return allWordsBab14;
+  case 15: return allWordsBab15;
+  case 16: return allWordsBab16;
+  case 17: return allWordsBab17;
+  case 18: return allWordsBab18;
+  case 19: return allWordsBab19;
+  case 20: return allWordsBab20;
+  case 21: return allWordsBab21;
+  case 22: return allWordsBab22;
+  case 23: return allWordsBab23;
+  case 24: return allWordsBab24;
+  case 25: return allWordsBab25;
+    default: return [];
+  }
+}
+
+/* ===== FUNGSI START DARI MENU ===== */
+function startFromMenu(){
+  const bab=parseInt(document.getElementById("selectBab").value);
+  const selectedWords=getBabWords(bab);
+  if(selectedWords.length===0){alert("Belum ada data untuk bab ini.");return;}
+  allQuestions=buildQuestions(selectedWords);
+  document.getElementById("judulBab").textContent=`Kuis Kosakata Bab ${bab}`;
+  document.getElementById("menu").style.display="none";
+  document.getElementById("quiz").style.display="block";
+  startQuiz();
+}
+
+/* ===== MEMBANGUN SOAL OTOMATIS ===== */
+function buildQuestions(source){
+  const qs=[];
+  source.forEach((w)=>{
+    const wrongs=[];
+    while(wrongs.length<3){
+      const r=source[Math.floor(Math.random()*source.length)].id;
+      if(r!==w.id && !wrongs.includes(r)) wrongs.push(r);
+    }
+    const opts=[w.id,...wrongs].sort(()=>Math.random()-0.5);
+    qs.push({q:w.jp,a:opts,c:opts.indexOf(w.id),e:w.e});
+  });
+  return qs;
+}
+
+/* ===== LOGIKA KUIS ===== */
+let quiz,index,score,startTime,remaining,timerId,answered=false;
+const PER_SOAL=20;
+let allQuestions=[],reviewData=[];
+
+const qEl=document.getElementById("question"),oEl=document.getElementById("options"),
+res=document.getElementById("result"),exp=document.getElementById("explain"),
+btn=document.getElementById("next"),bar=document.getElementById("bar"),
+scoreBox=document.getElementById("scoreBox"),timeEl=document.getElementById("time"),
+prog=document.getElementById("progressText"),review=document.getElementById("reviewSection"),
+restart=document.getElementById("restart");
+
+function shuffle(a){return a.sort(()=>Math.random()-0.5);}
+
+function startQuiz(){
+  quiz=shuffle(allQuestions).slice(0,20);
+  index=0;score=0;reviewData=[];
+  btn.style.display="inline-block";btn.disabled=true;
+  restart.style.display="none";review.style.display="none";
+  bar.style.width="0%";
+  load();
+}
+
+function startTimer(){
+  clearInterval(timerId);
+  remaining=PER_SOAL;
+  timeEl.textContent=`${remaining}`;
+  timerId=setInterval(()=>{
+    remaining--;
+    timeEl.textContent=`${remaining}`;
+    if(remaining<=0){clearInterval(timerId);timesUp();}
+  },1000);
+}
+
+function load(){
+  const q=quiz[index];answered=false;
+  qEl.textContent=`${index+1}. ${q.q}`;
+  oEl.innerHTML="";
+  q.a.forEach((opt,i)=>{
+    const d=document.createElement("div");
+    d.className="option";d.textContent=opt;
+    d.onclick=()=>select(i,d);
+    oEl.appendChild(d);
+  });
+  res.textContent="";
+  exp.style.display="none";
+  btn.disabled=true;
+  bar.style.width=((index)/quiz.length*100)+"%";
+  scoreBox.textContent=`Skor: ${score}`;
+  prog.textContent=`Soal ${index+1}/${quiz.length}`;
+  startTime=new Date();
+  startTimer();
+}
+
+function select(i,el){
+  if(answered)return;answered=true;clearInterval(timerId);
+  const q=quiz[index];
+  const opts=document.querySelectorAll(".option");
+  opts.forEach(o=>o.onclick=null);
+  let status="";
+  if(i===q.c){el.classList.add("correct");res.textContent="✅ Benar!";score++;ding();status="correct";}
+  else{el.classList.add("wrong");opts[q.c].classList.add("correct");res.textContent="❌ Salah!";buzz();status="wrong";}
+  exp.innerHTML=q.e;exp.style.display="block";btn.disabled=false;
+  const now=new Date();
+  const sisa=Math.max(0,PER_SOAL-Math.floor((now-startTime)/1000));
+  reviewData.push({num:index+1,question:q.q,your:q.a[i],correct:q.a[q.c],status,explain:q.e,time:`sisa ${sisa}s`});
+}
+
+function timesUp(){
+  if(answered)return;answered=true;
+  const q=quiz[index];
+  document.querySelectorAll(".option")[q.c]?.classList.add("correct");
+  res.textContent="⏰ Waktu habis!";buzz();
+  exp.innerHTML=q.e;exp.style.display="block";btn.disabled=false;
+  reviewData.push({num:index+1,question:q.q,your:"(habis waktu)",correct:q.a[q.c],status:"timeout",explain:q.e,time:"sisa 0s"});
+}
+
+btn.onclick=()=>{index++;if(index<quiz.length){load();}else{finish();}};
+
+function finish(){
+  clearInterval(timerId);
+  qEl.textContent="🎉 Kuis selesai!";
+  oEl.innerHTML="";
+  res.textContent=`Skor akhir: ${score}/${quiz.length}`;
+  const nilai=Math.round((score/quiz.length)*100);
+  scoreBox.textContent=`Nilai: ${nilai} / 100`;
+  exp.style.display="none";btn.style.display="none";bar.style.width="100%";
+  showReview();restart.style.display="inline-block";
+}
+
+function showReview(){
+  review.style.display="block";
+  review.innerHTML="<h3>📋 Review Jawaban</h3>";
+  reviewData.forEach(it=>{
+    const d=document.createElement("div");
+    d.className="review-item "+it.status;
+    d.innerHTML=`<b>${it.num}. ${it.question}</b><br>${
+      it.status==="correct"?"✅":it.status==="timeout"?"⏰":"❌"
+    } Jawaban kamu: ${it.your}<br>✅ Benar: ${it.correct}<br>🕒 ${it.time}<br>💬 ${it.explain}`;
+    review.appendChild(d);
+  });
+}
+
+restart.onclick=()=>{btn.style.display="inline-block";startQuiz();};
+const backToMenu=document.getElementById("backToMenu");
+
+function finish(){
+  clearInterval(timerId);
+  qEl.textContent="🎉 Kuis selesai!";
+  oEl.innerHTML="";
+  res.textContent=`Skor akhir: ${score}/${quiz.length}`;
+  const nilai=Math.round((score/quiz.length)*100);
+  scoreBox.textContent=`Nilai: ${nilai} / 100`;
+  exp.style.display="none";btn.style.display="none";bar.style.width="100%";
+  showReview();
+  restart.style.display="inline-block";
+  backToMenu.style.display="inline-block"; // tampilkan hanya setelah kuis selesai
+}
+
+// tombol ulangi kuis
+restart.onclick=()=>{
+  btn.style.display="inline-block";
+  backToMenu.style.display="none"; // << sembunyikan tombol Pilih Bab saat mengulang
+  startQuiz();
+};
+
+// tombol kembali ke menu
+backToMenu.onclick=()=>{
+  document.getElementById("quiz").style.display="none";
+  document.getElementById("menu").style.display="block";
+  backToMenu.style.display="none";
+  btn.style.display="inline-block";
+  review.style.display="none"; // sembunyikan review saat kembali
+};
+</script>
+</body>
+</html>
